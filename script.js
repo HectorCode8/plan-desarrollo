@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (isFeatured) {
                     return `
-                        <div id="card-${proposal.id}" class="proposal-card w-full p-8 rounded-2xl shadow-lg flex flex-col md:flex-row gap-8">
+                        <div id="card-${proposal.id}" class="proposal-card w-full p-8 rounded-2xl shadow-lg flex flex-col md:flex-row gap-8" data-aos="fade-right" data-aos-delay="300">
                             <div class="md:w-1/2">
                                 <h3 class="font-bold text-3xl text-stone-800 mb-4">${proposal.title}</h3>
                                 <p class="text-stone-600 text-base">${proposal.desc}</p>
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 return `
-                    <div id="card-${proposal.id}" class="proposal-card p-6 rounded-2xl shadow-lg flex flex-col">
+                    <div id="card-${proposal.id}" class="proposal-card p-6 rounded-2xl shadow-lg flex flex-col" data-aos="fade-up">
                         <h3 class="font-bold text-2xl text-stone-800 mb-4">${proposal.title}</h3>
                         <p class="text-stone-600 flex-grow text-sm">${proposal.desc}</p>
                         ${counterHtml}${chartHtml}${visualHtml}

@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     
     <!-- Chosen Palette: Indigo & Teal -->
     <!-- Application Structure Plan: Se ha diseñado una aplicación de una sola página con una navegación principal por pestañas (Ejes). Esta estructura fue elegida porque refleja directamente la organización del plan original, facilitando al ciudadano la exploración de temas específicos (Infraestructura, Economía, etc.) sin sentirse abrumado. Cada sección utiliza tarjetas para presentar las propuestas de forma digerible. El flujo es simple: el usuario selecciona un eje de interés y el contenido correspondiente aparece al instante, manteniendo la experiencia contenida y fluida. -->
@@ -30,7 +31,7 @@
             <p class="mt-8 text-lg text-stone-600 max-w-3xl mx-auto animated-sub-header">Un plan interactivo para transformar nuestro municipio. Haz clic en los ejes y explora las propuestas clave para el futuro de Teocuitatlán.</p>
         </header>
 
-        <section id="vision" class="mb-12">
+        <section id="vision" class="mb-12" data-aos="fade-up">
              <div class="bg-white p-8 rounded-2xl shadow-xl max-w-4xl mx-auto text-center border-t-4 border-indigo-700">
                 <h2 class="text-3xl font-bold text-indigo-800 mb-4"> Misión </h2>
                 <p class="text-lg md:text-xl text-stone-700 leading-relaxed">
@@ -51,37 +52,37 @@
         </nav>
 
         <main id="content-area">
-            <section id="eje1" class="content-section active">
+            <section id="eje1" class="content-section active" data-aos="fade-in" data-aos-delay="200">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Infraestructura de Vanguardia</h2><p class="text-lg text-stone-600 mt-2">Construyendo los cimientos de un futuro próspero y hermoso.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje2" class="content-section">
+            <section id="eje2" class="content-section" data-aos="fade-in" data-aos-delay="200">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Teocuitatlán Próspero</h2><p class="text-lg text-stone-600 mt-2">Generando riqueza y oportunidades para todos.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje3" class="content-section">
+            <section id="eje3" class="content-section" data-aos="fade-in" data-aos-delay="200">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Seguridad con Inteligencia</h2><p class="text-lg text-stone-600 mt-2">Tecnología de punta y una policía cercana para recuperar la paz.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje4" class="content-section">
+            <section id="eje4" class="content-section" data-aos="fade-in" data-aos-delay="200">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Gobierno Honesto y a tu Servicio</h2><p class="text-lg text-stone-600 mt-2">El poder regresa a los ciudadanos con transparencia y eficiencia.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje5" class="content-section">
+            <section id="eje5" class="content-section" data-aos="fade-in" data-aos-delay="200">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Salud y Bienestar Familiar</h2><p class="text-lg text-stone-600 mt-2">Un municipio sano es un municipio fuerte. Tu bienestar es nuestra prioridad.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje6" class="content-section">
+            <section id="eje6" class="content-section" data-aos="fade-in" data-aos-delay="200">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Energía y Sostenibilidad</h2><p class="text-lg text-stone-600 mt-2">Un futuro verde y próspero para las próximas generaciones.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje7" class="content-section">
+            <section id="eje7" class="content-section" data-aos="fade-in" data-aos-delay="200">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Deporte y Juventud</h2><p class="text-lg text-stone-600 mt-2">Espacios dignos y apoyo real para nuestros atletas y jóvenes.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -108,5 +109,12 @@
     </button>
 
     <script src="script.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        once: true
+      });
+    </script>
 </body>
 </html>
