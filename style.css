@@ -25,18 +25,18 @@ html {
             animation: fadeInDown 0.5s both;
         }
         .nav-button.active {
-            background-color: #4338ca; /* indigo-700 */
+            background-color: #f97316; /* orange-500 */
             color: white;
             font-weight: 700;
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(67, 56, 202, 0.3);
+            box-shadow: 0 4px 20px rgba(200, 87, 7, 0.3);
         }
         .nav-button:not(.active):hover {
             transform: translateY(-4px);
             background-color: white;
-            border-color: #14b8a6; /* teal-500 */
-            color: #0d9488; /* teal-600 */
-            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2);
+            border-color: #f59e0b; /* amber-500 */
+            color: #d97706; /* amber-600 */
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
         }
         .content-section {
             display: none;
@@ -53,7 +53,7 @@ html {
         .proposal-card:hover {
             transform: translateY(-10px) scale(1.03);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border-bottom-color: #14b8a6; /* teal-500 */
+            border-bottom-color: #f97316; /* orange-500 */
             z-index: 10;
         }
         .details-content {
@@ -70,7 +70,7 @@ html {
             width: 100%; background-color: #e5e7eb; border-radius: 9999px; height: 1.5rem; margin-top: 1rem; overflow: hidden;
         }
         .progress-bar {
-            background: linear-gradient(to right, #14b8a6, #2dd4bf); height: 100%; border-radius: 9999px; transition: width 1.2s cubic-bezier(0.25, 0.8, 0.25, 1); width: 0%;
+            background: linear-gradient(to right, #fb923c, #f97316); height: 100%; border-radius: 9999px; transition: width 1.2s cubic-bezier(0.25, 0.8, 0.25, 1); width: 0%;
         }
         #back-to-top {
             position: fixed;
