@@ -58,9 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const counterHtml = proposal.counter ? `<div class="text-center my-4"><div class="text-7xl font-extrabold text-orange-600" data-target="${proposal.counter}">0</div><p class="font-bold text-xl mt-2 font-title">Autobuses Nuevos</p></div>` : '';
                 const visualHtml = proposal.visual ? `<div class="mt-4 text-center"><p class="font-bold text-stone-700">${proposal.visual.label}</p><div class="progress-bar-container"><div class="progress-bar" data-value="${proposal.visual.value}"></div></div></div>` : '';
 
-                const cardFooter = `
+                const cardFooter = (proposalId) => `
                     <div class="mt-6 pt-4 border-t border-gray-200">
-                        <button class="toggle-details text-sm font-bold text-amber-600 hover:text-amber-800 self-start">Ver más +</button>
+                        <button class="toggle-details inline-flex items-center gap-2 text-sm font-bold text-amber-600 hover:text-amber-800 self-start" aria-expanded="false" aria-controls="details-${proposalId}">
+                            <span class="label">Ver más</span>
+                            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M6 4l8 6-8 6V4z"></path>
+                            </svg>
+                        </button>
                     </div>
                 `;
 
@@ -70,10 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="md:w-1/2">
                                 <h3 class="font-bold text-3xl text-stone-800 mb-4">${proposal.title}</h3>
                                 <p class="text-stone-600 text-base">${proposal.desc}</p>
-                                <div class="details-content mt-4 border-t border-gray-200">
+                <div id="details-${proposal.id}" class="details-content mt-4 border-t border-gray-200">
                                     <p class="text-sm text-stone-700">${proposal.details}</p>
                                 </div>
-                                ${cardFooter}
+                ${cardFooter(proposal.id)}
                             </div>
                             <div class="md:w-1/2 flex items-center justify-center">
                                 ${counterHtml}${chartHtml}${visualHtml}
@@ -87,10 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 class="font-bold text-2xl text-stone-800 mb-4">${proposal.title}</h3>
                         <p class="text-stone-600 flex-grow text-sm">${proposal.desc}</p>
                         ${counterHtml}${chartHtml}${visualHtml}
-                        <div class="details-content mt-4 border-t border-gray-200">
+            <div id="details-${proposal.id}" class="details-content mt-4 border-t border-gray-200">
                             <p class="text-sm text-stone-700">${proposal.details}</p>
                         </div>
-                        ${cardFooter}
+            ${cardFooter(proposal.id)}
                     </div>
                 `;
             }
@@ -128,10 +133,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 allCards.forEach((card, index) => { card.style.animationDelay = `${index * 100}ms`; });
                 
                 allCards.forEach(card => {
-                    card.querySelector('.toggle-details').addEventListener('click', (e) => {
-                        const details = e.target.closest('.proposal-card').querySelector('.details-content');
-                        details.classList.toggle('expanded');
-                        e.target.textContent = details.classList.contains('expanded') ? 'Ver menos -' : 'Ver más +';
+                    const btn = card.querySelector('.toggle-details');
+                    if (!btn) return;
+                    btn.addEventListener('click', (e) => {
+                        const button = e.currentTarget;
+                        const cardEl = button.closest('.proposal-card');
+                        const details = cardEl.querySelector('.details-content');
+                        const icon = button.querySelector('svg');
+                        const label = button.querySelector('.label');
+                        const willExpand = !details.classList.contains('expanded');
+
+                        details.classList.toggle('expanded', willExpand);
+                        button.setAttribute('aria-expanded', willExpand ? 'true' : 'false');
+                        if (label) label.textContent = willExpand ? 'Ver menos' : 'Ver más';
+                        if (icon) icon.classList.toggle('rotated', willExpand);
+
+                        if (willExpand) {
+                            const rect = cardEl.getBoundingClientRect();
+                            const overflowDown = rect.bottom > window.innerHeight;
+                            const overflowUp = rect.top < 0;
+                            if (overflowDown || overflowUp) {
+                                cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                        }
                     });
                 });
             }

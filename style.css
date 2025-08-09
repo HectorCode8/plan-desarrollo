@@ -62,7 +62,7 @@ html {
             transition: all 0.5s ease-in-out;
         }
         .details-content.expanded {
-            max-height: 200px;
+            max-height: 1000px; /* Aumentado para permitir contenido más largo */
             padding-top: 1rem;
             padding-bottom: 1rem;
         }
@@ -91,6 +91,12 @@ html {
         }
         .animated-sub-header {
             animation: fadeIn 1.2s 0.3s both;
+        }
+        .toggle-details svg {
+            transition: transform 0.3s ease-in-out;
+        }
+        .toggle-details svg.rotated {
+            transform: rotate(90deg);
         }
         .toggle-details:hover {
             transform: translateX(2px);
