@@ -21,9 +21,13 @@
 </head>
 <body class="text-stone-800">
 
+    <a href="#content-area" class="skip-link">Saltar al contenido</a>
+
+    
+
     <div class="container mx-auto px-4 py-8 md:py-12">
 
-        <header class="text-center mb-12" id="page-header">
+    <header class="text-center mb-12" id="page-header" role="banner">
             <div class="inline-block bg-gradient-to-br from-orange-500 to-orange-700 text-white py-8 px-10 rounded-3xl shadow-2xl animated-header">
                 <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">Plan de Desarrollo Municipal</h1>
                 <p class="text-xl md:text-2xl text-orange-100 font-title font-bold mt-2">Teocuitatlán de Corona 2027-2030</p>
@@ -41,55 +45,55 @@
             </div>
         </section>
 
-        <nav class="flex flex-wrap justify-center gap-3 md:gap-4 mb-12" id="main-nav">
-            <button data-target="eje1" class="nav-button active text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.2s;">Infraestructura</button>
-            <button data-target="eje2" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.3s;">Economía</button>
-            <button data-target="eje3" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.4s;">Seguridad</button>
-            <button data-target="eje4" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.5s;">Gobierno</button>
-            <button data-target="eje5" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.6s;">Salud</button>
-            <button data-target="eje6" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.7s;">Sostenibilidad</button>
-            <button data-target="eje7" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.8s;">Deporte</button>
+    <nav class="flex flex-wrap justify-center gap-3 md:gap-4 mb-12" id="main-nav" role="tablist" aria-label="Ejes del plan">
+            <button id="tab-eje1" role="tab" aria-controls="eje1" aria-selected="true" tabindex="0" data-target="eje1" class="nav-button active text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.2s;">Infraestructura</button>
+            <button id="tab-eje2" role="tab" aria-controls="eje2" aria-selected="false" tabindex="-1" data-target="eje2" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.3s;">Economía</button>
+            <button id="tab-eje3" role="tab" aria-controls="eje3" aria-selected="false" tabindex="-1" data-target="eje3" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.4s;">Seguridad</button>
+            <button id="tab-eje4" role="tab" aria-controls="eje4" aria-selected="false" tabindex="-1" data-target="eje4" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.5s;">Gobierno</button>
+            <button id="tab-eje5" role="tab" aria-controls="eje5" aria-selected="false" tabindex="-1" data-target="eje5" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.6s;">Salud</button>
+            <button id="tab-eje6" role="tab" aria-controls="eje6" aria-selected="false" tabindex="-1" data-target="eje6" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.7s;">Sostenibilidad</button>
+            <button id="tab-eje7" role="tab" aria-controls="eje7" aria-selected="false" tabindex="-1" data-target="eje7" class="nav-button text-sm md:text-base px-5 py-2.5 rounded-full font-title font-bold bg-white shadow-lg" style="animation-delay: 0.8s;">Deporte</button>
         </nav>
 
-        <main id="content-area">
-            <section id="eje1" class="content-section active" data-aos="fade-in" data-aos-delay="200">
+    <main id="content-area" role="main">
+            <section id="eje1" class="content-section active" data-aos="fade-in" data-aos-delay="200" role="tabpanel" aria-labelledby="tab-eje1" tabindex="0">
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Infraestructura de Vanguardia</h2><p class="text-lg text-stone-600 mt-2">Construyendo los cimientos de un futuro próspero y hermoso.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje2" class="content-section" data-aos="fade-in" data-aos-delay="200">
+            <section id="eje2" class="content-section" data-aos="fade-in" data-aos-delay="200" role="tabpanel" aria-labelledby="tab-eje2" tabindex="0" hidden>
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Teocuitatlán Próspero</h2><p class="text-lg text-stone-600 mt-2">Generando riqueza y oportunidades para todos.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje3" class="content-section" data-aos="fade-in" data-aos-delay="200">
+            <section id="eje3" class="content-section" data-aos="fade-in" data-aos-delay="200" role="tabpanel" aria-labelledby="tab-eje3" tabindex="0" hidden>
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Seguridad con Inteligencia</h2><p class="text-lg text-stone-600 mt-2">Tecnología de punta y una policía cercana para recuperar la paz.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje4" class="content-section" data-aos="fade-in" data-aos-delay="200">
+            <section id="eje4" class="content-section" data-aos="fade-in" data-aos-delay="200" role="tabpanel" aria-labelledby="tab-eje4" tabindex="0" hidden>
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Gobierno Honesto y a tu Servicio</h2><p class="text-lg text-stone-600 mt-2">El poder regresa a los ciudadanos con transparencia y eficiencia.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje5" class="content-section" data-aos="fade-in" data-aos-delay="200">
+            <section id="eje5" class="content-section" data-aos="fade-in" data-aos-delay="200" role="tabpanel" aria-labelledby="tab-eje5" tabindex="0" hidden>
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Salud y Bienestar Familiar</h2><p class="text-lg text-stone-600 mt-2">Un municipio sano es un municipio fuerte. Tu bienestar es nuestra prioridad.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje6" class="content-section" data-aos="fade-in" data-aos-delay="200">
+            <section id="eje6" class="content-section" data-aos="fade-in" data-aos-delay="200" role="tabpanel" aria-labelledby="tab-eje6" tabindex="0" hidden>
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Energía y Sostenibilidad</h2><p class="text-lg text-stone-600 mt-2">Un futuro verde y próspero para las próximas generaciones.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
-            <section id="eje7" class="content-section" data-aos="fade-in" data-aos-delay="200">
+            <section id="eje7" class="content-section" data-aos="fade-in" data-aos-delay="200" role="tabpanel" aria-labelledby="tab-eje7" tabindex="0" hidden>
                 <div class="text-center mb-10"><h2 class="text-3xl font-bold text-stone-900 tracking-tight">Deporte y Juventud</h2><p class="text-lg text-stone-600 mt-2">Espacios dignos y apoyo real para nuestros atletas y jóvenes.</p></div>
                 <div class="featured-container mb-8"></div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </section>
         </main>
         
-        <footer class="text-center mt-20 border-t-2 border-orange-200 pt-10">
+    <footer class="text-center mt-20 border-t-2 border-orange-200 pt-10" role="contentinfo">
             <h3 class="text-2xl font-bold text-stone-800">Súmate al Cambio</h3>
             <p class="text-stone-600 my-2">Una propuesta del <span class="font-bold">Ing. Hector Haro Hermosillo</span></p>
             <p class="text-stone-600 my-4">Síguenos en redes sociales y comparte tus ideas para mejorar nuestro municipio.</p>
@@ -104,7 +108,7 @@
         </footer>
     </div>
 
-    <button id="back-to-top" class="bg-orange-600 text-white rounded-full p-3 shadow-lg hover:bg-orange-700 transition-colors">
+    <button id="back-to-top" class="bg-orange-600 text-white rounded-full p-3 shadow-lg hover:bg-orange-700 transition-colors" aria-label="Volver arriba">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
     </button>
 

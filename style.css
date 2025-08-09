@@ -108,6 +108,44 @@ html {
         footer a:hover {
             transform: scale(1.1);
         }
+        .nav-button:focus-visible,
+        .toggle-details:focus-visible,
+        #back-to-top:focus-visible,
+        a:focus-visible,
+        button:focus-visible {
+            outline: 3px solid #f59e0b; /* amber-500 */
+            outline-offset: 3px;
+            border-radius: 9999px;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap; /* added line */
+            border: 0;
+        }
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .skip-link:focus {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 0.5rem 1rem;
+            background: #f97316;
+            color: #fff;
+            border-radius: 9999px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }

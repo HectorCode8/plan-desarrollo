@@ -53,6 +53,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
             
+            // Texto alternativo para describir gráficas a lectores de pantalla
+            function getChartAltText(type) {
+                switch (type) {
+                    case 'alumbrado': return 'Gráfico de dona de una sola sección que comunica la meta de 100 por ciento de cobertura de alumbrado LED.';
+                    case 'plaza_calidad_chart': return 'Gráfico de barras que compara la calidad del espacio público antes y después de la rehabilitación.';
+                    case 'agua': return 'Gráfico de línea que muestra la reducción proyectada de fugas de agua a lo largo de tres años.';
+                    case 'emprendedores': return 'Gráfico de barras que muestra el crecimiento de nuevas empresas por año.';
+                    case 'campo': return 'Gráfico de barras que compara ingresos actuales frente a ingresos propuestos para productores.';
+                    case 'turismo': return 'Gráfico de línea que refleja el aumento de visitantes a lo largo del tiempo.';
+                    case 'mercado_visitantes_chart': return 'Gráfico de barras que compara visitantes semanales antes y después de la modernización del mercado.';
+                    case 'policia_respuesta': return 'Gráfico de barras que compara tiempos de respuesta policial actuales y propuestos en minutos.';
+                    case 'vecinos': return 'Gráfico de dona que señala la meta de cien por ciento de colonias conectadas a la red de alerta municipal.';
+                    case 'justicia_civica_chart': return 'Gráfico de dona que indica el porcentaje objetivo de quejas atendidas frente a pendientes.';
+                    case 'presupuesto_participativo': return 'Gráfico de dona que representa la proporción del presupuesto decidido por ciudadanos.';
+                    case 'despacho_itinerante_chart': return 'Gráfico de dona que representa la meta de comunidades atendidas mensualmente.';
+                    case 'tramites_digitales': return 'Gráfico de barras que muestra la reducción del tiempo de atención de trámites en horas.';
+                    case 'servicios_publicos_chart': return 'Gráfico de barras que muestra la mejora en tiempos de atención de reportes de servicios públicos en días.';
+                    case 'brigadas_chart': return 'Gráfico de barras que muestra el número de consultas médicas realizadas por año.';
+                    case 'dengue_chart': return 'Gráfico de línea que muestra la disminución proyectada de casos de dengue.';
+                    case 'adultos_mayores_chart': return 'Gráfico de dona que muestra la meta de atención al cien por ciento de personas adultas mayores inscritas.';
+                    case 'parque_solar_chart': return 'Gráfico de barras que compara el costo de electricidad actual contra el costo con apoyo solar.';
+                    case 'cosecha_agua_chart': return 'Gráfico de línea que muestra la reducción de dependencia hídrica externa a lo largo del tiempo.';
+                    case 'basura_cero_chart': return 'Gráfico de dona que muestra la proporción de residuos reciclados o compostados frente a los llevados a relleno sanitario.';
+                    case 'reforestacion_chart': return 'Gráfico de barras que muestra la cantidad de árboles plantados por año.';
+                    case 'canchas_rehabilitadas_chart': return 'Gráfico de dona que comunica la meta de rehabilitar el cien por ciento de las canchas y espacios deportivos.';
+                    case 'semillero_campeones_chart': return 'Gráfico de barras que muestra el número de atletas apoyados por año.';
+                    default: return 'Gráfico informativo relacionado con la propuesta.';
+                }
+            }
+
             function createCard(proposal, isFeatured = false) {
                 const chartHtml = proposal.chart ? `<div class="chart-container mt-4"><canvas id="canvas-${proposal.id}" data-chart-config="${proposal.chart}"></canvas></div>` : '';
                 const counterHtml = proposal.counter ? `<div class="text-center my-4"><div class="text-7xl font-extrabold text-orange-600" data-target="${proposal.counter}">0</div><p class="font-bold text-xl mt-2 font-title">Autobuses Nuevos</p></div>` : '';
@@ -166,8 +196,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 charts = {};
 
-                contentSections.forEach(section => section.classList.toggle('active', section.id === targetId));
-                navButtons.forEach(button => button.classList.toggle('active', button.dataset.target === targetId));
+                contentSections.forEach(section => {
+                    const isActive = section.id === targetId;
+                    section.classList.toggle('active', isActive);
+                    section.hidden = !isActive;
+                });
+                navButtons.forEach(button => {
+                    const isActive = button.dataset.target === targetId;
+                    button.classList.toggle('active', isActive);
+                    button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    button.setAttribute('tabindex', isActive ? '0' : '-1');
+                });
                 
                 if (targetId) {
                     renderCards(targetId);
@@ -176,7 +215,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             proposals[targetId].forEach(p => {
                                 if (p.chart) {
                                     const canvas = document.getElementById(`canvas-${p.id}`);
-                                    if (canvas) createChart(canvas);
+                                    if (canvas) {
+                                        // Atributos ARIA y descripción para lectores de pantalla
+                                        canvas.setAttribute('role', 'img');
+                                        const descId = `chart-desc-${p.id}`;
+                                        let descEl = document.getElementById(descId);
+                                        if (!descEl) {
+                                            descEl = document.createElement('p');
+                                            descEl.id = descId;
+                                            descEl.className = 'sr-only';
+                                            const host = canvas.parentElement || canvas;
+                                            host.appendChild(descEl);
+                                        }
+                                        descEl.textContent = getChartAltText(p.chart);
+                                        canvas.setAttribute('aria-describedby', descId);
+                                        createChart(canvas);
+                                    }
                                 }
                                 if (p.counter) { const el = document.querySelector(`#card-${p.id} [data-target="${p.counter}"]`); if(el) animateCounter(el); }
                                 if (p.visual && p.visual.type === 'progress') { 
@@ -238,7 +292,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(config) charts[chartId] = new Chart(ctx, config);
             }
 
-            navButtons.forEach(button => { button.addEventListener('click', () => { activateSection(button.dataset.target); }); });
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => { activateSection(button.dataset.target); });
+                // Activación también con Enter o Espacio
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        activateSection(button.dataset.target);
+                    }
+                });
+            });
+
+            // Navegación por teclado para tabs (flechas, Home/End)
+            const tabs = Array.from(navButtons);
+            tabs.forEach((button, idx) => {
+                button.addEventListener('keydown', (e) => {
+                    let newIdx = null;
+                    switch (e.key) {
+                        case 'ArrowRight': newIdx = (idx + 1) % tabs.length; break;
+                        case 'ArrowLeft': newIdx = (idx - 1 + tabs.length) % tabs.length; break;
+                        case 'Home': newIdx = 0; break;
+                        case 'End': newIdx = tabs.length - 1; break;
+                        default: break;
+                    }
+                    if (newIdx !== null) {
+                        e.preventDefault();
+                        const nextTab = tabs[newIdx];
+                        nextTab.focus();
+                        activateSection(nextTab.dataset.target);
+                    }
+                });
+            });
             
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 300) {
