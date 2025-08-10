@@ -4,46 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const navButtons = document.querySelectorAll('.nav-button');
             const contentSections = document.querySelectorAll('.content-section');
             let charts = {};
-            const prefersReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            const liveAnim = {
-                rafs: {},
-                start(chart) {
-                    if (prefersReduce) return;
-                    const type = chart.config.type;
-                    let last = 0;
-                    const step = (ts) => {
-                        if (!chart || chart._destroyed) return; // safety
-                        if (ts - last > 80) { // ~12.5 FPS, suave y ligero
-                            last = ts;
-                            try {
-                                if (type === 'doughnut') {
-                                    const o = chart.options;
-                                    o.rotation = (o.rotation || -0.5 * Math.PI) + 0.08; // rotación lenta
-                                    if (o.rotation > Math.PI * 2) o.rotation -= Math.PI * 2;
-                                } else if (type === 'bar') {
-                                    const t = ts / 500;
-                                    const bw = 1 + Math.sin(t) * 0.7; // pulso sutil
-                                    chart.data.datasets.forEach(ds => { ds.borderWidth = bw; ds.borderColor = ds.borderColor || '#334155'; });
-                                } else if (type === 'line') {
-                                    const t = ts / 600;
-                                    const bw = 2 + Math.sin(t) * 0.8;
-                                    chart.data.datasets.forEach(ds => { ds.borderWidth = bw; ds.pointRadius = 2 + Math.abs(Math.sin(t)) * 1.5; });
-                                }
-                                chart.update('none');
-                            } catch { /* noop */ }
-                        }
-                        this.rafs[chart.id] = requestAnimationFrame(step);
-                    };
-                    this.stop(chart);
-                    this.rafs[chart.id] = requestAnimationFrame(step);
-                },
-                stop(chart) {
-                    const id = chart && this.rafs[chart.id];
-                    if (id) { cancelAnimationFrame(id); delete this.rafs[chart.id]; }
-                },
-                stopAll() { Object.values(charts).forEach(c => this.stop(c)); },
-                startAll() { Object.values(charts).forEach(c => this.start(c)); }
-            };
             const contentArea = document.getElementById('content-area');
             const backToTopButton = document.getElementById('back-to-top');
             const mainNav = document.getElementById('main-nav');
@@ -285,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             function activateSection(targetId, isInitialLoad = false) {
                 Object.values(charts).forEach(chart => {
-                    if (chart) { try { liveAnim.stop(chart); } catch {} chart.destroy(); }
+                    if (chart) { try { chart.destroy(); } catch {} }
                 });
                 charts = {};
 
@@ -355,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 let config;
                 const chartTitleOptions = { display: true, font: { size: 14, weight: 'bold', family: 'Poppins' }, color: '#44403c' };
-                const defaultOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+                const defaultOptions = { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } };
                 const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-500').trim() || '#8b5cf6';
                 const primarySoft = getComputedStyle(document.documentElement).getPropertyValue('--primary-400').trim() || '#a78bfa';
 
@@ -385,8 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'semillero_campeones_chart': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Atletas Apoyados', data: [20, 50, 100], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Atletas con Beca Deportiva' } }, scales: { y: { beginAtZero: true } } } }; break;
                 }
                 if(config) charts[chartId] = new Chart(ctx, config);
-                // Iniciar animación viva según tipo
-                try { liveAnim.start(charts[chartId]); } catch { /* noop */ }
             }
 
             navButtons.forEach(button => {
@@ -429,14 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Pausar animaciones si la pestaña no está visible
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    liveAnim.stopAll();
-                } else {
-                    liveAnim.startAll();
-                }
-            });
+            // Sin animaciones adicionales: no se requiere pausar/reanudar
 
             backToTopButton.addEventListener('click', () => {
                 mainNav.scrollIntoView({ behavior: 'smooth', block: 'center' });
