@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const themeToggle = document.getElementById('theme-toggle');
             const themePanel = document.getElementById('theme-panel');
 
-            // Gestión de tema: solo los 8 nuevos
-            const themes = ['pri', 'pan', 'prd', 'morena', 'pt', 'verde', 'mc', 'na'];
+            // Gestión de tema: 8 nuevos + neutral
+            const themes = ['neutral', 'pri', 'pan', 'prd', 'morena', 'pt', 'verde', 'mc', 'na'];
             function applyTheme(theme) {
                 const html = document.documentElement;
                 html.setAttribute('data-theme', theme);
@@ -26,13 +26,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (metaTheme) metaTheme.setAttribute('content', primary600);
             }
             const savedTheme = localStorage.getItem('theme');
-            const initial = themes.includes(savedTheme) ? savedTheme : 'mc';
+            const initial = themes.includes(savedTheme) ? savedTheme : 'neutral';
             applyTheme(initial);
             if (themeToggle) {
                 themeToggle.addEventListener('click', () => {
                     const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
                     themeToggle.setAttribute('aria-expanded', String(!expanded));
-                    if (themePanel) themePanel.classList.toggle('open', !expanded);
+                    if (themePanel) {
+                        themePanel.classList.toggle('open', !expanded);
+                        if (!expanded) {
+                            // Enfocar primer swatch al abrir
+                            const first = themePanel.querySelector('.swatch');
+                            if (first) first.focus();
+                        } else {
+                            // Devolver foco al botón al cerrar
+                            themeToggle.focus();
+                        }
+                    }
                 });
                 document.addEventListener('click', (e) => {
                     if (!themePanel || !themeToggle) return;
@@ -40,6 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (expanded && !themePanel.contains(e.target) && !themeToggle.contains(e.target)) {
                         themePanel.classList.remove('open');
                         themeToggle.setAttribute('aria-expanded', 'false');
+                        themeToggle.focus();
+                    }
+                });
+                // Cerrar con Escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && themePanel && themePanel.classList.contains('open')) {
+                        themePanel.classList.remove('open');
+                        themeToggle.setAttribute('aria-expanded', 'false');
+                        themeToggle.focus();
                     }
                 });
                 if (themePanel) {
