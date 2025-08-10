@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const navButtons = document.querySelectorAll('.nav-button');
             const contentSections = document.querySelectorAll('.content-section');
             let charts = {};
+            let eCharts = {};
             const prefersReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const Motion = window.motion; // { animate, timeline, stagger }
             const contentArea = document.getElementById('content-area');
@@ -288,10 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             function activateSection(targetId, isInitialLoad = false) {
-                Object.values(charts).forEach(chart => {
-                    if (chart) { try { chart.destroy(); } catch {} }
-                });
+                Object.values(charts).forEach(chart => { try { chart.destroy && chart.destroy(); } catch {} });
                 charts = {};
+                Object.values(eCharts).forEach(inst => { try { inst.dispose && inst.dispose(); } catch {} });
+                eCharts = {};
 
                 contentSections.forEach(section => {
                     const isActive = section.id === targetId;
@@ -353,6 +354,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (charts[chartId] && typeof charts[chartId].destroy === 'function') {
                     charts[chartId].destroy();
                 }
+                if (eCharts[chartId] && typeof eCharts[chartId].dispose === 'function') {
+                    eCharts[chartId].dispose();
+                }
                 
                 const ctx = canvas.getContext('2d');
                 if (!ctx) return;
@@ -363,8 +367,117 @@ document.addEventListener('DOMContentLoaded', () => {
                 const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-500').trim() || '#8b5cf6';
                 const primarySoft = getComputedStyle(document.documentElement).getPropertyValue('--primary-400').trim() || '#a78bfa';
 
+                // Piloto: usar ECharts (renderer SVG) para 'alumbrado'
+                if (type === 'alumbrado' && window.echarts) {
+                    // Reemplazar canvas por un contenedor ECharts dentro del mismo wrapper
+                    const host = canvas.parentElement || canvas;
+                    const containerId = `echart-${chartId}`;
+                    let container = host.querySelector(`#${containerId}`);
+                    if (!container) {
+                        container = document.createElement('div');
+                        container.id = containerId;
+                        container.style.width = '100%';
+                        container.style.height = '300px';
+                        // Ocultar canvas original para evitar solapado
+                        canvas.style.display = 'none';
+                        host.appendChild(container);
+                    }
+                    const prefersReduceAnim = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    // Copiar atributos ARIA al contenedor para accesibilidad
+                    const ariaDesc = canvas.getAttribute('aria-describedby');
+                    container.setAttribute('role', 'img');
+                    if (ariaDesc) container.setAttribute('aria-describedby', ariaDesc);
+                    const chart = window.echarts.init(container, null, { renderer: 'svg' });
+                    const option = {
+                        title: { text: 'Meta: 100% Cobertura LED', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                        animation: !prefersReduceAnim,
+                        animationDuration: 700,
+                        animationEasing: 'cubicOut',
+                        tooltip: { show: false },
+                        legend: { show: false },
+                        graphic: !prefersReduceAnim ? {
+                            elements: [{
+                                type: 'text', left: 'center', top: '52%',
+                                style: { text: '100%', fontFamily: 'Poppins', fontSize: 22, fontWeight: 'bold', fill: primary },
+                                keyframeAnimation: {
+                                    duration: 600, delay: 200, loop: false,
+                                    keyframes: [
+                                        { percent: 0, style: { opacity: 0 }, scaleX: 0.95, scaleY: 0.95 },
+                                        { percent: 1, style: { opacity: 1 }, scaleX: 1, scaleY: 1 }
+                                    ]
+                                }
+                            }]
+                        } : undefined,
+                        series: [{
+                            type: 'pie',
+                            radius: ['50%', '70%'],
+                            center: ['50%', '52%'],
+                            animationType: 'expansion',
+                            animationDuration: 900,
+                            animationEasing: 'cubicOut',
+                            avoidLabelOverlap: false,
+                            label: { show: false },
+                            labelLine: { show: false },
+                            emphasis: { disabled: true },
+                            data: [
+                                { value: 100, name: 'LED', itemStyle: { color: primary } },
+                                { value: 0, name: 'Pendiente', itemStyle: { color: '#e5e7eb' } }
+                            ]
+                        }]
+                    };
+                    chart.setOption(option);
+                    eCharts[chartId] = chart;
+                    // Micro-animación del contenedor al aparecer (no loop)
+                    if (Motion && !prefersReduceAnim) {
+                        try { Motion.animate(container, { opacity: [0, 1], transform: ['scale(0.985)', 'scale(1)'] }, { duration: 0.22, easing: 'ease-out' }); } catch {}
+                    }
+                    return;
+                }
+
                 switch (type) {
                     case 'alumbrado': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Cobertura LED' } } } }; break;
+                    case 'mercado_visitantes_chart':
+                        if (window.echarts) {
+                            const host = canvas.parentElement || canvas;
+                            const containerId2 = `echart-${chartId}`;
+                            let container2 = host.querySelector(`#${containerId2}`);
+                            if (!container2) {
+                                container2 = document.createElement('div');
+                                container2.id = containerId2;
+                                container2.style.width = '100%';
+                                container2.style.height = '320px';
+                                canvas.style.display = 'none';
+                                host.appendChild(container2);
+                            }
+                            const prefersReduceAnim2 = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                            const ec2 = window.echarts.init(container2, null, { renderer: 'svg' });
+                            const option2 = {
+                                title: { text: 'Aumento de Visitantes al Mercado', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                animation: !prefersReduceAnim2,
+                                animationDuration: 700,
+                                animationDurationUpdate: 500,
+                                animationEasing: 'cubicOut',
+                                animationEasingUpdate: 'cubicOut',
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
+                                grid: { left: 24, right: 16, top: 56, bottom: 48 },
+                                xAxis: { type: 'category', data: ['Visitantes Semanales'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } } },
+                                series: [
+                                    { name: 'Antes', type: 'bar', data: [500], itemStyle: { color: '#6b7280', borderRadius: [4,4,0,0] }, animationDelay: (idx) => 120 },
+                                    { name: 'Después', type: 'bar', data: [1500], itemStyle: { color: primary, borderRadius: [4,4,0,0] }, animationDelay: (idx) => 220 }
+                                ]
+                            };
+                            ec2.setOption(option2);
+                            eCharts[chartId] = ec2;
+                            if (Motion && !prefersReduceAnim2) {
+                                try { Motion.animate(container2, { opacity: [0, 1], transform: ['translateY(6px)', 'translateY(0)'] }, { duration: 0.26, easing: 'ease-out' }); } catch {}
+                            }
+                            return;
+                        }
+                        // Fallback a Chart.js si no hay ECharts
+                        config = { type: 'bar', data: { labels: ['Visitantes Semanales'], datasets: [{ label: 'Antes', data: [500], backgroundColor: '#6b7280'}, { label: 'Después', data: [1500], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Aumento de Visitantes al Mercado' } }, scales: { y: { beginAtZero: true } } } };
+                        break;
                     case 'plaza_calidad_chart': config = { type: 'bar', data: { labels: ['Calidad del Espacio Público'], datasets: [{ label: 'Antes', data: [40], backgroundColor: '#6b7280'}, { label: 'Después', data: [95], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Mejora del Espacio Público' } }, scales: { y: { beginAtZero: true, max: 100 } } } }; break;
                     case 'agua': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Fugas', data: [40, 30, 15, 5], fill: true, borderColor: '#fb923c', backgroundColor: 'rgba(251, 146, 60, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Fugas (%)' } } } }; break;
                     case 'emprendedores': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Nuevas Empresas', data: [15, 35, 50], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Nuevas Empresas Creadas' } }, scales: { y: { beginAtZero: true } } } }; break;
