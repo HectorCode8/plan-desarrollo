@@ -249,20 +249,20 @@ html[data-theme="na"] {
         #back-to-top { background-color: var(--primary-600); }
         #back-to-top:hover { background-color: var(--primary-700); }
 
-        /* Botón de tema */
+        /* Botón de tema: icono circular arriba (no sigue al hacer scroll) */
         #theme-toggle {
-            position: fixed; top: 16px; right: 16px; z-index: 50; display: inline-flex; align-items: center; gap: 8px;
+            position: absolute; top: 16px; right: 16px; z-index: 50; display: inline-flex; align-items: center; justify-content: center;
             background: white; color: #0f172a; /* slate-900 */
             border: 2px solid var(--primary-400); border-radius: 9999px;
-            padding: 8px 12px; font-weight: 700; font-family: 'Poppins', sans-serif;
+            width: 48px; height: 48px; padding: 0; font-weight: 700; font-family: 'Poppins', sans-serif;
             box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
         #theme-toggle:hover { background: var(--primary-50); }
-        #theme-toggle .dot { width: 14px; height: 14px; border-radius: 9999px; background: var(--primary-600); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.05); }
-        #theme-toggle .chev { width: 16px; height: 16px; color: #334155; }
+        #theme-toggle .dot { width: 16px; height: 16px; border-radius: 9999px; background: var(--primary-600); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.05); }
+        #theme-toggle .label, #theme-toggle .chev { display: none; }
 
         /* Panel de selección de tema */
-        .theme-panel { position: fixed; top: 60px; right: 16px; z-index: 50; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 10px 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.15); display: none; max-height: 70vh; overflow: auto; }
+    .theme-panel { position: absolute; top: 60px; right: 16px; z-index: 50; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 10px 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.15); display: none; max-height: 70vh; overflow: auto; }
         .theme-panel.open { display: block; }
         .swatches { display: flex; flex-direction: column; gap: 10px; }
         .swatch { width: 28px; height: 28px; border-radius: 9999px; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.1); cursor: pointer; }
