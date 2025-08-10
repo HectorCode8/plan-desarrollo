@@ -280,9 +280,9 @@ html[data-theme="na"] {
 
         /* Móvil (<=640px): igual que escritorio, botón con texto en la parte superior y panel vertical */
         @media (max-width: 640px) {
-            #theme-toggle { top: 16px; right: 16px; bottom: auto; width: auto; height: auto; padding: 8px 12px; gap: 8px; }
-            #theme-toggle .label, #theme-toggle .chev { display: inline-block; }
-            #theme-toggle .dot { width: 14px; height: 14px; }
+                    #theme-toggle { position: absolute; top: 16px; right: 16px; bottom: auto; width: 48px; height: 48px; padding: 0; gap: 0; }
+                    #theme-toggle .label, #theme-toggle .chev { display: none; }
+                    #theme-toggle .dot { width: 16px; height: 16px; }
 
             #back-to-top { bottom: 20px; right: 20px; }
 
