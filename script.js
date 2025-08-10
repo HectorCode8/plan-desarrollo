@@ -7,6 +7,52 @@ document.addEventListener('DOMContentLoaded', () => {
             const contentArea = document.getElementById('content-area');
             const backToTopButton = document.getElementById('back-to-top');
             const mainNav = document.getElementById('main-nav');
+            const themeToggle = document.getElementById('theme-toggle');
+            const themePanel = document.getElementById('theme-panel');
+
+            // Gestión de tema: solo los 8 nuevos
+            const themes = ['pri', 'pan', 'prd', 'morena', 'pt', 'verde', 'mc', 'na'];
+            function applyTheme(theme) {
+                const html = document.documentElement;
+                html.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                if (themeToggle) {
+                    const label = themeToggle.querySelector('.label');
+                    if (label) label.textContent = `Tema`;
+                }
+                // Actualiza meta theme-color según el tema activo
+                const primary600 = getComputedStyle(document.documentElement).getPropertyValue('--primary-600').trim() || '#7c3aed';
+                const metaTheme = document.querySelector('meta[name="theme-color"]');
+                if (metaTheme) metaTheme.setAttribute('content', primary600);
+            }
+            const savedTheme = localStorage.getItem('theme');
+            const initial = themes.includes(savedTheme) ? savedTheme : 'mc';
+            applyTheme(initial);
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
+                    themeToggle.setAttribute('aria-expanded', String(!expanded));
+                    if (themePanel) themePanel.classList.toggle('open', !expanded);
+                });
+                document.addEventListener('click', (e) => {
+                    if (!themePanel || !themeToggle) return;
+                    const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
+                    if (expanded && !themePanel.contains(e.target) && !themeToggle.contains(e.target)) {
+                        themePanel.classList.remove('open');
+                        themeToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                if (themePanel) {
+                    themePanel.querySelectorAll('.swatch').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const t = btn.getAttribute('data-theme');
+                            applyTheme(t);
+                            themePanel.classList.remove('open');
+                            themeToggle.setAttribute('aria-expanded', 'false');
+                        });
+                    });
+                }
+            }
 
             const proposals = {
                 eje1: [
@@ -85,12 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             function createCard(proposal, isFeatured = false) {
                 const chartHtml = proposal.chart ? `<div class="chart-container mt-4"><canvas id="canvas-${proposal.id}" data-chart-config="${proposal.chart}"></canvas></div>` : '';
-                const counterHtml = proposal.counter ? `<div class="text-center my-4"><div class="text-7xl font-extrabold text-orange-600" data-target="${proposal.counter}">0</div><p class="font-bold text-xl mt-2 font-title">Autobuses Nuevos</p></div>` : '';
+                const counterHtml = proposal.counter ? `<div class="text-center my-4"><div class="text-7xl font-extrabold brand-counter" data-target="${proposal.counter}">0</div><p class="font-bold text-xl mt-2 font-title">Autobuses Nuevos</p></div>` : '';
                 const visualHtml = proposal.visual ? `<div class="mt-4 text-center"><p class="font-bold text-stone-700">${proposal.visual.label}</p><div class="progress-bar-container"><div class="progress-bar" data-value="${proposal.visual.value}"></div></div></div>` : '';
 
                 const cardFooter = (proposalId) => `
                     <div class="mt-6 pt-4 border-t border-gray-200">
-                        <button class="toggle-details inline-flex items-center gap-2 text-sm font-bold text-amber-600 hover:text-amber-800 self-start" aria-expanded="false" aria-controls="details-${proposalId}">
+                        <button class="toggle-details inline-flex items-center gap-2 text-sm font-bold brand-link self-start" aria-expanded="false" aria-controls="details-${proposalId}">
                             <span class="label">Ver más</span>
                             <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path d="M6 4l8 6-8 6V4z"></path>
@@ -263,30 +309,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 let config;
                 const chartTitleOptions = { display: true, font: { size: 14, weight: 'bold', family: 'Poppins' }, color: '#44403c' };
                 const defaultOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+                const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-500').trim() || '#8b5cf6';
+                const primarySoft = getComputedStyle(document.documentElement).getPropertyValue('--primary-400').trim() || '#a78bfa';
 
                 switch (type) {
-                    case 'alumbrado': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: ['#f97316', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Cobertura LED' } } } }; break;
-                    case 'plaza_calidad_chart': config = { type: 'bar', data: { labels: ['Calidad del Espacio Público'], datasets: [{ label: 'Antes', data: [40], backgroundColor: '#6b7280'}, { label: 'Después', data: [95], backgroundColor: '#f97316' }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Mejora del Espacio Público' } }, scales: { y: { beginAtZero: true, max: 100 } } } }; break;
+                    case 'alumbrado': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Cobertura LED' } } } }; break;
+                    case 'plaza_calidad_chart': config = { type: 'bar', data: { labels: ['Calidad del Espacio Público'], datasets: [{ label: 'Antes', data: [40], backgroundColor: '#6b7280'}, { label: 'Después', data: [95], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Mejora del Espacio Público' } }, scales: { y: { beginAtZero: true, max: 100 } } } }; break;
                     case 'agua': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Fugas', data: [40, 30, 15, 5], fill: true, borderColor: '#fb923c', backgroundColor: 'rgba(251, 146, 60, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Fugas (%)' } } } }; break;
                     case 'emprendedores': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Nuevas Empresas', data: [15, 35, 50], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Nuevas Empresas Creadas' } }, scales: { y: { beginAtZero: true } } } }; break;
                     case 'campo': config = { type: 'bar', data: { labels: ['Ingreso Actual', 'Ingreso Propuesto'], datasets: [{ label: 'Ganancia del Productor', data: [100, 150], backgroundColor: ['#6b7280', '#f97316'], borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Aumento de Rentabilidad' } } } }; break;
-                    case 'turismo': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Visitantes', data: [1000, 2500, 4500, 7000], fill: true, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Crecimiento Exponencial de Visitantes' } } } }; break;
-                    case 'mercado_visitantes_chart': config = { type: 'bar', data: { labels: ['Visitantes Semanales'], datasets: [{ label: 'Antes', data: [500], backgroundColor: '#6b7280'}, { label: 'Después', data: [1500], backgroundColor: '#f97316' }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Aumento de Visitantes al Mercado' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'policia_respuesta': config = { type: 'bar', data: { labels: ['Tiempo de Respuesta (Min)'], datasets: [{ label: 'Actual', data: [15], backgroundColor: '#6b7280'}, { label: 'Propuesta', data: [5], backgroundColor: '#f97316' }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción Tiempo de Respuesta' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'vecinos': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: ['#f97316', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Colonias Conectadas' } } } }; break;
+                    case 'turismo': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Visitantes', data: [1000, 2500, 4500, 7000], fill: true, borderColor: primary, backgroundColor: 'rgba(139, 92, 246, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Crecimiento Exponencial de Visitantes' } } } }; break;
+                    case 'mercado_visitantes_chart': config = { type: 'bar', data: { labels: ['Visitantes Semanales'], datasets: [{ label: 'Antes', data: [500], backgroundColor: '#6b7280'}, { label: 'Después', data: [1500], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Aumento de Visitantes al Mercado' } }, scales: { y: { beginAtZero: true } } } }; break;
+                    case 'policia_respuesta': config = { type: 'bar', data: { labels: ['Tiempo de Respuesta (Min)'], datasets: [{ label: 'Actual', data: [15], backgroundColor: '#6b7280'}, { label: 'Propuesta', data: [5], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción Tiempo de Respuesta' } }, scales: { y: { beginAtZero: true } } } }; break;
+                    case 'vecinos': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Colonias Conectadas' } } } }; break;
                     case 'justicia_civica_chart': config = { type: 'doughnut', data: { labels: ['Quejas Atendidas', 'Pendientes'], datasets: [{ data: [95, 5], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 95% de Quejas Resueltas' } } } }; break;
                     case 'presupuesto_participativo': config = { type: 'doughnut', data: { labels: ['Decidido por Ciudadanos', 'Presupuesto Regular'], datasets: [{ data: [20, 80], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: '20% del Presupuesto en tus Manos' } } } }; break;
                     case 'despacho_itinerante_chart': config = { type: 'doughnut', data: { labels: ['Comunidades Atendidas', 'Pendientes'], datasets: [{ data: [100, 0], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% comunidades visitadas al mes' } } } }; break;
-                    case 'tramites_digitales': config = { type: 'bar', data: { labels: ['Tiempo para un Trámite (Hrs)'], datasets: [{ label: 'Antes', data: [4], backgroundColor: '#6b7280'}, { label: 'Ahora', data: [0.25], backgroundColor: '#f97316' }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción Drástica de Tiempos' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'servicios_publicos_chart': config = { type: 'bar', data: { labels: ['Tiempo de Atención (Días)'], datasets: [{ label: 'Antes', data: [15], backgroundColor: '#6b7280'}, { label: 'Ahora', data: [3], backgroundColor: '#f97316' }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Respuesta Rápida a Reportes' } }, scales: { y: { beginAtZero: true } } } }; break;
+                    case 'tramites_digitales': config = { type: 'bar', data: { labels: ['Tiempo para un Trámite (Hrs)'], datasets: [{ label: 'Antes', data: [4], backgroundColor: '#6b7280'}, { label: 'Ahora', data: [0.25], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción Drástica de Tiempos' } }, scales: { y: { beginAtZero: true } } } }; break;
+                    case 'servicios_publicos_chart': config = { type: 'bar', data: { labels: ['Tiempo de Atención (Días)'], datasets: [{ label: 'Antes', data: [15], backgroundColor: '#6b7280'}, { label: 'Ahora', data: [3], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Respuesta Rápida a Reportes' } }, scales: { y: { beginAtZero: true } } } }; break;
                     case 'brigadas_chart': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Consultas Realizadas', data: [2000, 5000, 8000], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Consultas Médicas Gratuitas' } }, scales: { y: { beginAtZero: true } } } }; break;
                     case 'dengue_chart': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Casos de Dengue', data: [100, 60, 20, 5], fill: true, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Casos de Dengue' } } } }; break;
-                    case 'adultos_mayores_chart': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: ['#f97316', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: Atención al 100% de inscritos' } } } }; break;
-                    case 'parque_solar_chart': config = { type: 'bar', data: { labels: ['Costo de Electricidad'], datasets: [{ label: 'Costo Actual', data: [100], backgroundColor: '#6b7280'}, { label: 'Costo con Apoyo Solar', data: [60], backgroundColor: '#f97316' }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción en Recibo de Luz (-40%)' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'cosecha_agua_chart': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Dependencia Externa', data: [100, 85, 70, 55], fill: true, borderColor: '#fb923c', backgroundColor: 'rgba(251, 146, 60, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Dependencia Hídrica (%)' } } } }; break;
+                    case 'adultos_mayores_chart': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: Atención al 100% de inscritos' } } } }; break;
+                    case 'parque_solar_chart': config = { type: 'bar', data: { labels: ['Costo de Electricidad'], datasets: [{ label: 'Costo Actual', data: [100], backgroundColor: '#6b7280'}, { label: 'Costo con Apoyo Solar', data: [60], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción en Recibo de Luz (-40%)' } }, scales: { y: { beginAtZero: true } } } }; break;
+                    case 'cosecha_agua_chart': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Dependencia Externa', data: [100, 85, 70, 55], fill: true, borderColor: primary, backgroundColor: `${primarySoft}33`, tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Dependencia Hídrica (%)' } } } }; break;
                     case 'basura_cero_chart': config = { type: 'doughnut', data: { labels: ['Reciclado/Compostado', 'Relleno Sanitario'], datasets: [{ data: [60, 40], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 60% de Basura Revalorizada' } } } }; break;
                     case 'reforestacion_chart': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Árboles Plantados', data: [2500, 6000, 10000], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Nuevos Árboles para Teocuitatlán' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'canchas_rehabilitadas_chart': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: ['#f97316', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Canchas Rehabilitadas' } } } }; break;
+                    case 'canchas_rehabilitadas_chart': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Canchas Rehabilitadas' } } } }; break;
                     case 'semillero_campeones_chart': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Atletas Apoyados', data: [20, 50, 100], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Atletas con Beca Deportiva' } }, scales: { y: { beginAtZero: true } } } }; break;
                 }
                 if(config) charts[chartId] = new Chart(ctx, config);
