@@ -32,17 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 themeToggle.addEventListener('click', () => {
                     const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
                     themeToggle.setAttribute('aria-expanded', String(!expanded));
-                    if (themePanel) {
-                        themePanel.classList.toggle('open', !expanded);
-                        if (!expanded) {
-                            // Enfocar primer swatch al abrir
-                            const first = themePanel.querySelector('.swatch');
-                            if (first) first.focus();
-                        } else {
-                            // Devolver foco al botón al cerrar
-                            themeToggle.focus();
-                        }
-                    }
+                    if (themePanel) themePanel.classList.toggle('open', !expanded);
                 });
                 document.addEventListener('click', (e) => {
                     if (!themePanel || !themeToggle) return;
@@ -50,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (expanded && !themePanel.contains(e.target) && !themeToggle.contains(e.target)) {
                         themePanel.classList.remove('open');
                         themeToggle.setAttribute('aria-expanded', 'false');
-                        themeToggle.focus();
                     }
                 });
                 // Cerrar con Escape
@@ -58,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (e.key === 'Escape' && themePanel && themePanel.classList.contains('open')) {
                         themePanel.classList.remove('open');
                         themeToggle.setAttribute('aria-expanded', 'false');
-                        themeToggle.focus();
                     }
                 });
                 if (themePanel) {
