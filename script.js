@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const navButtons = document.querySelectorAll('.nav-button');
             const contentSections = document.querySelectorAll('.content-section');
             let charts = {};
+            const prefersReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const Motion = window.motion; // { animate, timeline, stagger }
             const contentArea = document.getElementById('content-area');
             const backToTopButton = document.getElementById('back-to-top');
             const mainNav = document.getElementById('main-nav');
@@ -31,22 +33,51 @@ document.addEventListener('DOMContentLoaded', () => {
             if (themeToggle) {
                 themeToggle.addEventListener('click', () => {
                     const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
-                    themeToggle.setAttribute('aria-expanded', String(!expanded));
-                    if (themePanel) themePanel.classList.toggle('open', !expanded);
+                    if (!expanded) {
+                        themeToggle.setAttribute('aria-expanded', 'true');
+                        if (themePanel) {
+                            themePanel.classList.add('open');
+                            if (Motion && !prefersReduce) {
+                                Motion.animate(themePanel, { opacity: [0, 1], transform: ['translateY(-8px)', 'translateY(0)'] }, { duration: 0.25, easing: 'ease-out' });
+                            }
+                        }
+                    } else {
+                        // Animar cierre y luego ocultar
+                        if (themePanel && Motion && !prefersReduce) {
+                            const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.2, easing: 'ease-in' });
+                            a.finished.then(() => {
+                                themePanel.classList.remove('open');
+                                themeToggle.setAttribute('aria-expanded', 'false');
+                            });
+                        } else {
+                            if (themePanel) themePanel.classList.remove('open');
+                            themeToggle.setAttribute('aria-expanded', 'false');
+                        }
+                    }
                 });
                 document.addEventListener('click', (e) => {
                     if (!themePanel || !themeToggle) return;
                     const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
                     if (expanded && !themePanel.contains(e.target) && !themeToggle.contains(e.target)) {
-                        themePanel.classList.remove('open');
-                        themeToggle.setAttribute('aria-expanded', 'false');
+                        if (Motion && !prefersReduce) {
+                            const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.18, easing: 'ease-in' });
+                            a.finished.then(() => { themePanel.classList.remove('open'); themeToggle.setAttribute('aria-expanded', 'false'); });
+                        } else {
+                            themePanel.classList.remove('open');
+                            themeToggle.setAttribute('aria-expanded', 'false');
+                        }
                     }
                 });
                 // Cerrar con Escape
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && themePanel && themePanel.classList.contains('open')) {
-                        themePanel.classList.remove('open');
-                        themeToggle.setAttribute('aria-expanded', 'false');
+                        if (Motion && !prefersReduce) {
+                            const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.18, easing: 'ease-in' });
+                            a.finished.then(() => { themePanel.classList.remove('open'); themeToggle.setAttribute('aria-expanded', 'false'); });
+                        } else {
+                            themePanel.classList.remove('open');
+                            themeToggle.setAttribute('aria-expanded', 'false');
+                        }
                     }
                 });
                 if (themePanel) {
@@ -54,8 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         btn.addEventListener('click', () => {
                             const t = btn.getAttribute('data-theme');
                             applyTheme(t);
-                            themePanel.classList.remove('open');
-                            themeToggle.setAttribute('aria-expanded', 'false');
+                            if (Motion && !prefersReduce) {
+                                const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.15, easing: 'ease-in' });
+                                a.finished.then(() => { themePanel.classList.remove('open'); themeToggle.setAttribute('aria-expanded', 'false'); });
+                            } else {
+                                themePanel.classList.remove('open');
+                                themeToggle.setAttribute('aria-expanded', 'false');
+                            }
                         });
                     });
                 }
@@ -184,12 +220,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             function animateCounter(element) {
-                const target = +element.dataset.target; let current = 0; const increment = target / 100;
+                const target = Number(element.dataset.target) || 0;
+                try {
+                    if (window.countUp && window.countUp.CountUp) {
+                        const cu = new window.countUp.CountUp(element, target, { duration: 1.2, separator: ',', useEasing: true });
+                        if (!cu.error) { cu.start(); return; }
+                    }
+                } catch { /* noop */ }
+                // Fallback simple
+                let current = 0; const increment = Math.max(1, Math.ceil(target / 60));
                 const interval = setInterval(() => {
                     current += increment;
                     if (current >= target) { current = target; clearInterval(interval); }
-                    element.textContent = Math.ceil(current);
-                }, 20);
+                    element.textContent = current.toString();
+                }, 16);
             }
             
             function animateProgressBar(bar) {
@@ -381,7 +425,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 300) {
+                    const wasHidden = !backToTopButton.classList.contains('show');
                     backToTopButton.classList.add('show');
+                    if (wasHidden && Motion && !prefersReduce) {
+                        Motion.animate(backToTopButton, { opacity: [0, 1], transform: ['translateY(10px) scale(0.9)', 'translateY(0) scale(1)'] }, { duration: 0.22, easing: 'ease-out' });
+                    }
                 } else {
                     backToTopButton.classList.remove('show');
                 }
