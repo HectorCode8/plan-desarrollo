@@ -277,6 +277,36 @@ html[data-theme="na"] {
     .swatch.verde { background: #22c55e; }
     .swatch.mc { background: #f97316; }
     .swatch.na { background: #0faab3; }
+
+        /* Móvil: FAB compacto solo con ícono (<=640px) */
+        @media (max-width: 640px) {
+            #theme-toggle {
+                position: fixed;
+                bottom: 16px;
+                right: 16px;
+                bottom: calc(16px + env(safe-area-inset-bottom));
+                right: calc(16px + env(safe-area-inset-right));
+                width: 48px;
+                height: 48px;
+                padding: 0;
+                border-radius: 9999px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0;
+                box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+            }
+            #theme-toggle .label,
+            #theme-toggle .chev { display: none; }
+            #theme-toggle .dot { width: 18px; height: 18px; }
+
+            /* Evitar que el back-to-top tape el FAB */
+            #back-to-top { bottom: 76px; right: 16px; }
+
+            /* Reposicionar panel cerca del FAB */
+            .theme-panel { top: auto; bottom: 72px; right: 12px; left: auto; width: min(85vw, 280px); border-radius: 16px; }
+            .theme-panel.open { display: block; }
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
