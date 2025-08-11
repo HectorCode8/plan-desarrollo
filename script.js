@@ -544,11 +544,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             const ec = initEChart(c);
                             const opts = {
                                 title: { text: 'Aumento de Rentabilidad', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                animation: !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
+                                animationDuration: 700,
+                                animationDurationUpdate: 500,
+                                animationEasing: 'cubicOut',
+                                animationEasingUpdate: 'cubicOut',
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: (window.innerWidth <= 640 ? 52 : 40) },
-                                xAxis: { type: 'category', data: ['Ingreso Actual','Ingreso Propuesto'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
+                                grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 64 : 72), bottom: (window.innerWidth <= 640 ? 56 : 56) },
+                                xAxis: { type: 'category', data: ['Ingreso Mensual'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
-                                series: [{ type: 'bar', data: [100,150], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : '#f97316', borderRadius: [8,8,0,0] } }]
+                                series: [
+                                    { name: 'Antes', type: 'bar', data: [100], itemStyle: { color: '#6b7280', borderRadius: [4,4,0,0] }, animationDelay: (idx) => 120 },
+                                    { name: 'Después', type: 'bar', data: [150], itemStyle: { color: primary, borderRadius: [4,4,0,0] }, animationDelay: (idx) => 220 }
+                                ]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
                         }
