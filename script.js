@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-            Chart.defaults.animation = false;
+            // Mantén animaciones suaves y respetuosas; micro-animación opcional por gráfica
 
             const navButtons = document.querySelectorAll('.nav-button');
             const contentSections = document.querySelectorAll('.content-section');
-            let charts = {};
             let eCharts = {};
             const prefersReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const Motion = window.motion; // { animate, timeline, stagger }
@@ -12,6 +11,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const mainNav = document.getElementById('main-nav');
             const themeToggle = document.getElementById('theme-toggle');
             const themePanel = document.getElementById('theme-panel');
+
+            // Helpers de color/tema y utilidades de charts
+            function getThemeColor(varName, fallback) {
+                return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || fallback;
+            }
+            function formatNumber(n) {
+                const v = Number(n);
+                if (!isFinite(v)) return String(n);
+                return v >= 1000 ? new Intl.NumberFormat('es-MX', { notation: 'compact' }).format(v) : v.toString();
+            }
+            // Chart.js eliminado; toda la visualización usa ECharts.
 
             // Gestión de tema: 8 nuevos + neutral
             const themes = ['neutral', 'pri', 'pan', 'prd', 'morena', 'pt', 'verde', 'mc', 'na'];
@@ -24,9 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (label) label.textContent = `Tema`;
                 }
                 // Actualiza meta theme-color según el tema activo
-                const primary600 = getComputedStyle(document.documentElement).getPropertyValue('--primary-600').trim() || '#7c3aed';
+                const primary600 = getThemeColor('--primary-600', '#7c3aed');
                 const metaTheme = document.querySelector('meta[name="theme-color"]');
                 if (metaTheme) metaTheme.setAttribute('content', primary600);
+                // Re-render de charts visibles para aplicar la nueva paleta
+                try { refreshVisibleCharts(); } catch { /* noop */ }
             }
             const savedTheme = localStorage.getItem('theme');
             const initial = themes.includes(savedTheme) ? savedTheme : 'neutral';
@@ -289,8 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             function activateSection(targetId, isInitialLoad = false) {
-                Object.values(charts).forEach(chart => { try { chart.destroy && chart.destroy(); } catch {} });
-                charts = {};
                 Object.values(eCharts).forEach(inst => { try { inst.dispose && inst.dispose(); } catch {} });
                 eCharts = {};
 
@@ -347,47 +357,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            function createChart(canvas) {
-                if (!canvas) return;
-                const type = canvas.dataset.chartConfig;
-                const chartId = canvas.id;
-                if (charts[chartId] && typeof charts[chartId].destroy === 'function') {
-                    charts[chartId].destroy();
-                }
-                if (eCharts[chartId] && typeof eCharts[chartId].dispose === 'function') {
-                    eCharts[chartId].dispose();
-                }
-                
-                const ctx = canvas.getContext('2d');
-                if (!ctx) return;
-                
-                let config;
-                const chartTitleOptions = { display: true, font: { size: 14, weight: 'bold', family: 'Poppins' }, color: '#44403c' };
-                const defaultOptions = { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } };
-                const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-500').trim() || '#8b5cf6';
-                const primarySoft = getComputedStyle(document.documentElement).getPropertyValue('--primary-400').trim() || '#a78bfa';
+            // Re-render de todos los canvases visibles (cuando cambia el tema)
+            function refreshVisibleCharts() {
+                const activeSection = document.querySelector('.content-section.active');
+                if (!activeSection) return;
+                const canvases = activeSection.querySelectorAll('canvas[data-chart-config]');
+                canvases.forEach((canvas) => {
+                    const id = canvas.id;
+                    try { if (eCharts[id]) { eCharts[id].dispose(); delete eCharts[id]; } } catch {}
+                    createChart(canvas);
+                });
+            }
 
-                // Piloto: usar ECharts (renderer SVG) para 'alumbrado'
-                if (type === 'alumbrado' && window.echarts) {
-                    // Reemplazar canvas por un contenedor ECharts dentro del mismo wrapper
-                    const host = canvas.parentElement || canvas;
-                    const containerId = `echart-${chartId}`;
-                    let container = host.querySelector(`#${containerId}`);
-                    if (!container) {
-                        container = document.createElement('div');
-                        container.id = containerId;
-                        container.style.width = '100%';
-                        container.style.height = '300px';
-                        // Ocultar canvas original para evitar solapado
-                        canvas.style.display = 'none';
-                        host.appendChild(container);
-                    }
-                    const prefersReduceAnim = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            // Helpers para usar ECharts dentro del mismo wrapper del canvas
+            function ensureEContainer(canvas, height = '320px') {
+                const host = canvas.parentElement || canvas;
+                const containerId = `echart-${canvas.id}`;
+                let container = host.querySelector(`#${containerId}`);
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = containerId;
+                    container.style.width = '100%';
+                    container.style.height = height;
                     // Copiar atributos ARIA al contenedor para accesibilidad
                     const ariaDesc = canvas.getAttribute('aria-describedby');
                     container.setAttribute('role', 'img');
                     if (ariaDesc) container.setAttribute('aria-describedby', ariaDesc);
-                    const chart = window.echarts.init(container, null, { renderer: 'svg' });
+                    // Ocultar canvas original para evitar solapado
+                    canvas.style.display = 'none';
+                    host.appendChild(container);
+                }
+                return container;
+            }
+            function initEChart(container) {
+                return window.echarts.init(container, null, { renderer: 'svg' });
+            }
+
+            function createChart(canvas) {
+                if (!canvas) return;
+                const type = canvas.dataset.chartConfig;
+                const chartId = canvas.id;
+                if (eCharts[chartId] && typeof eCharts[chartId].dispose === 'function') {
+                    eCharts[chartId].dispose();
+                }
+                
+                const prefersReduceAnim = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const primary = getThemeColor('--primary-500', '#8b5cf6');
+                const primarySoft = getThemeColor('--primary-400', '#a78bfa');
+                const primaryDark = getThemeColor('--primary-700', '#6d28d9');
+
+                // Piloto: usar ECharts (renderer SVG) para 'alumbrado'
+                if (type === 'alumbrado' && window.echarts) {
+                    // Reemplazar canvas por un contenedor ECharts dentro del mismo wrapper
+                    const container = ensureEContainer(canvas, '300px');
+                    const prefersReduceAnim = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const chart = initEChart(container);
                     const option = {
                         title: { text: 'Meta: 100% Cobertura LED', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                         animation: !prefersReduceAnim,
@@ -397,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         legend: { show: false },
                         graphic: !prefersReduceAnim ? {
                             elements: [{
-                                type: 'text', left: 'center', top: '52%',
+                                type: 'text', left: 'center', top: 'middle',
                                 style: { text: '100%', fontFamily: 'Poppins', fontSize: 22, fontWeight: 'bold', fill: primary },
                                 keyframeAnimation: {
                                     duration: 600, delay: 200, loop: false,
@@ -411,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         series: [{
                             type: 'pie',
                             radius: ['50%', '70%'],
-                            center: ['50%', '52%'],
+                            center: ['50%', '50%'],
                             animationType: 'expansion',
                             animationDuration: 900,
                             animationEasing: 'cubicOut',
@@ -435,22 +459,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 switch (type) {
-                    case 'alumbrado': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Cobertura LED' } } } }; break;
+                    case 'alumbrado': {
+                        // Ya cubierto arriba con ECharts
+                        break;
+                    }
                     case 'mercado_visitantes_chart':
                         if (window.echarts) {
-                            const host = canvas.parentElement || canvas;
-                            const containerId2 = `echart-${chartId}`;
-                            let container2 = host.querySelector(`#${containerId2}`);
-                            if (!container2) {
-                                container2 = document.createElement('div');
-                                container2.id = containerId2;
-                                container2.style.width = '100%';
-                                container2.style.height = '320px';
-                                canvas.style.display = 'none';
-                                host.appendChild(container2);
-                            }
+                const container2 = ensureEContainer(canvas, '320px');
                             const prefersReduceAnim2 = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                            const ec2 = window.echarts.init(container2, null, { renderer: 'svg' });
+                const ec2 = initEChart(container2);
                             const option2 = {
                                 title: { text: 'Aumento de Visitantes al Mercado', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 animation: !prefersReduceAnim2,
@@ -460,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 animationEasingUpdate: 'cubicOut',
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
-                                grid: { left: 24, right: 16, top: 56, bottom: 48 },
+                                grid: { left: 40, right: 16, top: 56, bottom: 56 },
                                 xAxis: { type: 'category', data: ['Visitantes Semanales'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } } },
                                 series: [
@@ -475,33 +492,372 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                             return;
                         }
-                        // Fallback a Chart.js si no hay ECharts
-                        config = { type: 'bar', data: { labels: ['Visitantes Semanales'], datasets: [{ label: 'Antes', data: [500], backgroundColor: '#6b7280'}, { label: 'Después', data: [1500], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Aumento de Visitantes al Mercado' } }, scales: { y: { beginAtZero: true } } } };
                         break;
-                    case 'plaza_calidad_chart': config = { type: 'bar', data: { labels: ['Calidad del Espacio Público'], datasets: [{ label: 'Antes', data: [40], backgroundColor: '#6b7280'}, { label: 'Después', data: [95], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Mejora del Espacio Público' } }, scales: { y: { beginAtZero: true, max: 100 } } } }; break;
-                    case 'agua': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Fugas', data: [40, 30, 15, 5], fill: true, borderColor: '#fb923c', backgroundColor: 'rgba(251, 146, 60, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Fugas (%)' } } } }; break;
-                    case 'emprendedores': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Nuevas Empresas', data: [15, 35, 50], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Nuevas Empresas Creadas' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'campo': config = { type: 'bar', data: { labels: ['Ingreso Actual', 'Ingreso Propuesto'], datasets: [{ label: 'Ganancia del Productor', data: [100, 150], backgroundColor: ['#6b7280', '#f97316'], borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Aumento de Rentabilidad' } } } }; break;
-                    case 'turismo': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Visitantes', data: [1000, 2500, 4500, 7000], fill: true, borderColor: primary, backgroundColor: 'rgba(139, 92, 246, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Crecimiento Exponencial de Visitantes' } } } }; break;
-                    case 'mercado_visitantes_chart': config = { type: 'bar', data: { labels: ['Visitantes Semanales'], datasets: [{ label: 'Antes', data: [500], backgroundColor: '#6b7280'}, { label: 'Después', data: [1500], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Aumento de Visitantes al Mercado' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'policia_respuesta': config = { type: 'bar', data: { labels: ['Tiempo de Respuesta (Min)'], datasets: [{ label: 'Actual', data: [15], backgroundColor: '#6b7280'}, { label: 'Propuesta', data: [5], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción Tiempo de Respuesta' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'vecinos': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Colonias Conectadas' } } } }; break;
-                    case 'justicia_civica_chart': config = { type: 'doughnut', data: { labels: ['Quejas Atendidas', 'Pendientes'], datasets: [{ data: [95, 5], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 95% de Quejas Resueltas' } } } }; break;
-                    case 'presupuesto_participativo': config = { type: 'doughnut', data: { labels: ['Decidido por Ciudadanos', 'Presupuesto Regular'], datasets: [{ data: [20, 80], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: '20% del Presupuesto en tus Manos' } } } }; break;
-                    case 'despacho_itinerante_chart': config = { type: 'doughnut', data: { labels: ['Comunidades Atendidas', 'Pendientes'], datasets: [{ data: [100, 0], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% comunidades visitadas al mes' } } } }; break;
-                    case 'tramites_digitales': config = { type: 'bar', data: { labels: ['Tiempo para un Trámite (Hrs)'], datasets: [{ label: 'Antes', data: [4], backgroundColor: '#6b7280'}, { label: 'Ahora', data: [0.25], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción Drástica de Tiempos' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'servicios_publicos_chart': config = { type: 'bar', data: { labels: ['Tiempo de Atención (Días)'], datasets: [{ label: 'Antes', data: [15], backgroundColor: '#6b7280'}, { label: 'Ahora', data: [3], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Respuesta Rápida a Reportes' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'brigadas_chart': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Consultas Realizadas', data: [2000, 5000, 8000], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Consultas Médicas Gratuitas' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'dengue_chart': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Casos de Dengue', data: [100, 60, 20, 5], fill: true, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Casos de Dengue' } } } }; break;
-                    case 'adultos_mayores_chart': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: Atención al 100% de inscritos' } } } }; break;
-                    case 'parque_solar_chart': config = { type: 'bar', data: { labels: ['Costo de Electricidad'], datasets: [{ label: 'Costo Actual', data: [100], backgroundColor: '#6b7280'}, { label: 'Costo con Apoyo Solar', data: [60], backgroundColor: primary }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción en Recibo de Luz (-40%)' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'cosecha_agua_chart': config = { type: 'line', data: { labels: ['Año 0', '1', '2', '3'], datasets: [{ label: 'Dependencia Externa', data: [100, 85, 70, 55], fill: true, borderColor: primary, backgroundColor: `${primarySoft}33`, tension: 0.4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Reducción de Dependencia Hídrica (%)' } } } }; break;
-                    case 'basura_cero_chart': config = { type: 'doughnut', data: { labels: ['Reciclado/Compostado', 'Relleno Sanitario'], datasets: [{ data: [60, 40], backgroundColor: ['#f59e0b', '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 60% de Basura Revalorizada' } } } }; break;
-                    case 'reforestacion_chart': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Árboles Plantados', data: [2500, 6000, 10000], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Nuevos Árboles para Teocuitatlán' } }, scales: { y: { beginAtZero: true } } } }; break;
-                    case 'canchas_rehabilitadas_chart': config = { type: 'doughnut', data: { datasets: [{ data: [100, 0], backgroundColor: [primary, '#e5e7eb'], borderColor: ['#fff'], borderWidth: 4 }] }, options: { ...defaultOptions, cutout: '70%', plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Meta: 100% Canchas Rehabilitadas' } } } }; break;
-                    case 'semillero_campeones_chart': config = { type: 'bar', data: { labels: ['Año 1', 'Año 2', 'Año 3'], datasets: [{ label: 'Atletas Apoyados', data: [20, 50, 100], backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: { ...defaultOptions, plugins: { ...defaultOptions.plugins, title: { ...chartTitleOptions, text: 'Atletas con Beca Deportiva' } }, scales: { y: { beginAtZero: true } } } }; break;
+                    case 'plaza_calidad_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Mejora del Espacio Público', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Antes', 'Después'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } } },
+                                series: [{ type: 'bar', data: [40, 95], itemStyle: { color: (p) => p.dataIndex === 0 ? '#9ca3af' : primary, borderRadius: [6,6,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'agua':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Reducción de Fugas (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis' },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', min: 0, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+                                series: [{ name: 'Fugas', type: 'line', smooth: true, data: [40,30,15,5], lineStyle: { width: 2.5, color: '#fb923c' }, areaStyle: { color: 'rgba(251,146,60,0.18)' }, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fb923c' } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'emprendedores':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Nuevas Empresas Creadas', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [15,35,50], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'campo':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Aumento de Rentabilidad', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Ingreso Actual','Ingreso Propuesto'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [100,150], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : '#f97316', borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'turismo':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Crecimiento Exponencial de Visitantes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis' },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ name: 'Visitantes', type: 'line', smooth: true, data: [1000,2500,4500,7000], lineStyle: { width: 2.5, color: primary }, areaStyle: { color: `${primarySoft}55` }, symbol: 'circle', symbolSize: 8, itemStyle: { color: primary } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'policia_respuesta':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Reducción Tiempo de Respuesta', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Actual','Propuesta'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' } },
+                                series: [{ type: 'bar', data: [15,5], itemStyle: { color: (p)=> p.dataIndex===0? '#6b7280' : primary, borderRadius: [6,6,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'vecinos': {
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '300px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Meta: 100% Colonias Conectadas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { show: false },
+                                legend: { show: false },
+                                graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Conectadas', itemStyle: { color: primary } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    }
+                    case 'justicia_civica_chart': {
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '300px');
+                            const ec = initEChart(c);
+                            const amber = '#f59e0b';
+                            const opts = {
+                                title: { text: 'Meta: 95% de Quejas Resueltas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { show: false },
+                                legend: { show: false },
+                                graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '95%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 95, name: 'Atendidas', itemStyle: { color: amber } }, { value: 5, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    }
+                    case 'presupuesto_participativo':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '300px');
+                            const ec = initEChart(c);
+                            const amber = '#f59e0b';
+                            const opts = {
+                                title: { text: '20% del Presupuesto en tus Manos', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { show: true, formatter: '{b}: {c}%' }, legend: { show: false },
+                                series: [{ type: 'pie', radius: ['40%','70%'], center: ['50%','50%'], label: { formatter: '{b}: {d}%' }, data: [{ value: 20, name: 'Decidido por Ciudadanos', itemStyle: { color: amber } }, { value: 80, name: 'Presupuesto Regular', itemStyle: { color: '#e5e7eb' } }] }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'despacho_itinerante_chart': {
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '300px');
+                            const ec = initEChart(c);
+                            const amber = '#f59e0b';
+                            const opts = {
+                                title: { text: 'Meta: 100% comunidades visitadas al mes', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { show: false }, legend: { show: false },
+                                graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidas', itemStyle: { color: amber } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    }
+                    case 'tramites_digitales':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Reducción Drástica de Tiempos', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [4,0.25], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'servicios_publicos_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Respuesta Rápida a Reportes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [15,3], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'brigadas_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Consultas Médicas Gratuitas', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [2000,5000,8000], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'dengue_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Reducción de Casos de Dengue', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis' },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', min: 0, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+                                series: [{ name: 'Casos de Dengue', type: 'line', smooth: true, data: [100,60,20,5], lineStyle: { width: 2.5, color: '#ef4444' }, areaStyle: { color: 'rgba(239,68,68,0.18)' }, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#ef4444' } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'adultos_mayores_chart': {
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '300px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Meta: Atención al 100% de inscritos', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { show: false }, legend: { show: false },
+                                graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidos', itemStyle: { color: primary } }, { value: 0, name: 'Pendiente', itemStyle: { color: '#e5e7eb' } }] }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    }
+                    case 'parque_solar_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Reducción en Recibo de Luz (-40%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Costo Actual','Apoyo Solar'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [100,60], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'cosecha_agua_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Reducción de Dependencia Hídrica (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis' },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', min: 0, max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ name: 'Dependencia Externa', type: 'line', smooth: true, data: [100,85,70,55], lineStyle: { width: 2.5, color: primary }, areaStyle: { color: `${primarySoft}55` }, symbol: 'circle', symbolSize: 8, itemStyle: { color: primary } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'basura_cero_chart': {
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '300px');
+                            const ec = initEChart(c);
+                            const amber = '#f59e0b';
+                            const opts = {
+                                title: { text: 'Meta: 60% de Basura Revalorizada', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { show: false }, legend: { show: false },
+                                graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '60%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 60, name: 'Revalorizado', itemStyle: { color: amber } }, { value: 40, name: 'Relleno', itemStyle: { color: '#e5e7eb' } }] }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    }
+                    case 'reforestacion_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Nuevos Árboles para Teocuitatlán', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [2500,6000,10000], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    case 'canchas_rehabilitadas_chart': {
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '300px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Meta: 100% Canchas Rehabilitadas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { show: false }, legend: { show: false },
+                                graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Rehabilitadas', itemStyle: { color: primary } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    }
+                    case 'semillero_campeones_chart':
+                        if (window.echarts) {
+                            const c = ensureEContainer(canvas, '320px');
+                            const ec = initEChart(c);
+                            const opts = {
+                                title: { text: 'Atletas con Beca Deportiva', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                series: [{ type: 'bar', data: [20,50,100], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
+                            };
+                            ec.setOption(opts); eCharts[chartId] = ec; return;
+                        }
+                        break;
+                    // Nuevos tipos opcionales para usar en propuestas futuras, ahora en ECharts
+                    case 'gauge_avance': {
+                        const c = ensureEContainer(canvas, '300px');
+                        const ec = initEChart(c);
+                        const value = 75;
+                        const opts = {
+                            title: { text: 'Avance General', left: 'center', top: 6, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                            tooltip: { show: false },
+                            series: [{
+                                type: 'gauge', startAngle: 180, endAngle: 0, center: ['50%','65%'], radius: '90%',
+                                progress: { show: true, width: 14, roundCap: true, itemStyle: { color: primary } },
+                                axisLine: { lineStyle: { width: 14, color: [[1, '#e5e7eb']] } },
+                                splitLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, pointer: { show: false },
+                                detail: { valueAnimation: true, formatter: '{value}%', fontSize: 18, fontFamily: 'Poppins', color: primary, offsetCenter: [0, '0%'] },
+                                data: [{ value }]
+                            }]
+                        };
+                        ec.setOption(opts); eCharts[chartId] = ec; return;
+                    }
+                    case 'radar_balance': {
+                        const c = ensureEContainer(canvas, '320px');
+                        const ec = initEChart(c);
+                        const opts = {
+                            title: { text: 'Balance de Objetivos', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                            legend: { bottom: 0, textStyle: { color: '#44403c' } },
+                            radar: { indicator: [
+                                { name: 'Movilidad', max: 100 }, { name: 'Agua', max: 100 }, { name: 'Seguridad', max: 100 }, { name: 'Economía', max: 100 }, { name: 'Salud', max: 100 }
+                            ], axisName: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } }, splitArea: { areaStyle: { color: ['#fff'] } } },
+                            series: [
+                                { type: 'radar', name: 'Actual', data: [[45,50,55,50,52]], areaStyle: { color: 'rgba(148,163,184,0.2)' }, lineStyle: { color: '#94a3b8' }, itemStyle: { color: '#94a3b8' } },
+                                { type: 'radar', name: 'Objetivo', data: [[85,80,90,88,86]], areaStyle: { color: `${primarySoft}55` }, lineStyle: { color: primary }, itemStyle: { color: primary } }
+                            ]
+                        };
+                        ec.setOption(opts); eCharts[chartId] = ec; return;
+                    }
+                    case 'stacked_empleo': {
+                        const c = ensureEContainer(canvas, '320px');
+                        const ec = initEChart(c);
+                        const opts = {
+                            title: { text: 'Estructura del Empleo (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                            legend: { bottom: 0 },
+                            grid: { left: 40, right: 16, top: 56, bottom: 56 },
+                            xAxis: { type: 'category', data: ['Antes','Después'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+                            yAxis: { type: 'value', max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                            series: [
+                                { name: 'Formal', type: 'bar', stack: 'total', data: [40,65], itemStyle: { color: primary, borderRadius: [8,8,0,0] } },
+                                { name: 'Informal', type: 'bar', stack: 'total', data: [60,35], itemStyle: { color: '#cbd5e1', borderRadius: [8,8,0,0] } }
+                            ]
+                        };
+                        ec.setOption(opts); eCharts[chartId] = ec; return;
+                    }
                 }
-                if(config) charts[chartId] = new Chart(ctx, config);
             }
 
             navButtons.forEach(button => {
@@ -555,4 +911,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             activateSection('eje1', true);
+
+            // Redimensiona gráficas ECharts cuando cambie el viewport
+            window.addEventListener('resize', () => {
+                Object.values(eCharts).forEach((inst) => { try { inst.resize(); } catch {} });
+            });
         });
