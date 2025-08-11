@@ -105,9 +105,10 @@ html[data-theme="na"] {
             max-width: 350px;
             margin-left: auto;
             margin-right: auto;
-            height: 250px;
-            max-height: 280px;
+            height: 320px; /* más espacio para ejes/etiquetas */
+            margin-bottom: 8px; /* separación del texto inferior */
         }
+        .chart-container canvas { display: block; width: 100% !important; height: 100% !important; }
         .nav-button {
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             border: 2px solid transparent;
@@ -138,6 +139,8 @@ html[data-theme="na"] {
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             background-color: white;
             border-bottom: 4px solid #d1d5db; /* gray-300 */
+            /* asegurar espacio para tooltips que flotan sobre el borde inferior en móvil */
+            padding-bottom: 8px;
         }
         .proposal-card:hover {
             transform: translateY(-10px) scale(1.03);
@@ -280,6 +283,8 @@ html[data-theme="na"] {
 
         /* Móvil (<=640px): igual que escritorio, botón con texto en la parte superior y panel vertical */
         @media (max-width: 640px) {
+            /* Más alto en móvil para dejar espacio a ejes, leyendas y tooltips */
+            .chart-container { height: 380px; }
                     #theme-toggle { position: absolute; top: 16px; right: 16px; bottom: auto; width: 48px; height: 48px; padding: 0; gap: 0; }
                     #theme-toggle .label, #theme-toggle .chev { display: none; }
                     #theme-toggle .dot { width: 16px; height: 16px; }

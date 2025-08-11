@@ -477,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 animationEasingUpdate: 'cubicOut',
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
-                                grid: { left: 40, right: 16, top: 56, bottom: 56 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 72 : 56) },
                                 xAxis: { type: 'category', data: ['Visitantes Semanales'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } } },
                                 series: [
@@ -500,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Mejora del Espacio Público', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Antes', 'Después'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } } },
                                 series: [{ type: 'bar', data: [40, 95], itemStyle: { color: (p) => p.dataIndex === 0 ? '#9ca3af' : primary, borderRadius: [6,6,0,0] } }]
@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Reducción de Fugas (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis' },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', min: 0, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
                                 series: [{ name: 'Fugas', type: 'line', smooth: true, data: [40,30,15,5], lineStyle: { width: 2.5, color: '#fb923c' }, areaStyle: { color: 'rgba(251,146,60,0.18)' }, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fb923c' } }]
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Nuevas Empresas Creadas', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
                                 series: [{ type: 'bar', data: [15,35,50], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
@@ -545,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Aumento de Rentabilidad', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Ingreso Actual','Ingreso Propuesto'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
                                 series: [{ type: 'bar', data: [100,150], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : '#f97316', borderRadius: [8,8,0,0] } }]
@@ -560,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Crecimiento Exponencial de Visitantes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis' },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
                                 series: [{ name: 'Visitantes', type: 'line', smooth: true, data: [1000,2500,4500,7000], lineStyle: { width: 2.5, color: primary }, areaStyle: { color: `${primarySoft}55` }, symbol: 'circle', symbolSize: 8, itemStyle: { color: primary } }]
@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Reducción Tiempo de Respuesta', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Actual','Propuesta'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' } },
                                 series: [{ type: 'bar', data: [15,5], itemStyle: { color: (p)=> p.dataIndex===0? '#6b7280' : primary, borderRadius: [6,6,0,0] } }]
@@ -592,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 tooltip: { show: false },
                                 legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
-                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Conectadas', itemStyle: { color: primary } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Conectadas', itemStyle: { color: primary } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
                         }
@@ -608,7 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 tooltip: { show: false },
                                 legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '95%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
-                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 95, name: 'Atendidas', itemStyle: { color: amber } }, { value: 5, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 95, name: 'Atendidas', itemStyle: { color: amber } }, { value: 5, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
                         }
@@ -636,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 title: { text: 'Meta: 100% comunidades visitadas al mes', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
-                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidas', itemStyle: { color: amber } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidas', itemStyle: { color: amber } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
                         }
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Reducción Drástica de Tiempos', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
                                 series: [{ type: 'bar', data: [4,0.25], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const opts = {
                                 title: { text: 'Respuesta Rápida a Reportes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                grid: { left: 40, right: 16, top: 56, bottom: 40 },
+                                grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 64 : 40) },
                                 xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                                 yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
                                 series: [{ type: 'bar', data: [15,3], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
@@ -710,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 title: { text: 'Meta: Atención al 100% de inscritos', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
-                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidos', itemStyle: { color: primary } }, { value: 0, name: 'Pendiente', itemStyle: { color: '#e5e7eb' } }] }]
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidos', itemStyle: { color: primary } }, { value: 0, name: 'Pendiente', itemStyle: { color: '#e5e7eb' } }] }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
                         }
@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 title: { text: 'Meta: 60% de Basura Revalorizada', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '60%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
-                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 60, name: 'Revalorizado', itemStyle: { color: amber } }, { value: 40, name: 'Relleno', itemStyle: { color: '#e5e7eb' } }] }]
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 60, name: 'Revalorizado', itemStyle: { color: amber } }, { value: 40, name: 'Relleno', itemStyle: { color: '#e5e7eb' } }] }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
                         }
@@ -784,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 title: { text: 'Meta: 100% Canchas Rehabilitadas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
-                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%','50%'], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Rehabilitadas', itemStyle: { color: primary } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
+                                series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Rehabilitadas', itemStyle: { color: primary } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
                         }
@@ -847,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             title: { text: 'Estructura del Empleo (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
                             tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                             legend: { bottom: 0 },
-                            grid: { left: 40, right: 16, top: 56, bottom: 56 },
+                            grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 72 : 56) },
                             xAxis: { type: 'category', data: ['Antes','Después'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
                             yAxis: { type: 'value', max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
                             series: [
