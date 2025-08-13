@@ -286,8 +286,9 @@ html[data-theme="night"] footer a:hover { color: var(--primary-400); }
                     #theme-toggle .dot { width: 16px; height: 16px; }
 
             #back-to-top { bottom: 20px; right: 20px; }
-            /* Botón detrás de tarjetas en móvil */
-            #back-to-top { z-index: 0; }
+            /* Mantener clickeable: alto z-index; efecto sutil reducido */
+            #back-to-top { z-index: 90; opacity: 0.85; }
+            #back-to-top:active { opacity: 1; }
 
             /* No swatches en móvil */
         }
