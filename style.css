@@ -167,6 +167,7 @@ html[data-theme="night"] [data-aos] { will-change: transform, opacity; }
             visibility: hidden;
             transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
             transform: translateY(20px);
+            z-index: 80; /* sobre partículas, tarjetas y toggle */
         }
         #back-to-top.show {
             opacity: 1;
