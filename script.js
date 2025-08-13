@@ -865,18 +865,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Sin animaciones adicionales: no se requiere pausar/reanudar
 
             backToTopButton.addEventListener('click', () => {
-                const active = document.querySelector('.content-section.active');
-                // Si hay sección activa visible y está parcialmente desplazada, subir a su cabecera; si no, al nav
-                if (active) {
-                    const rect = active.getBoundingClientRect();
-                    const topOffset = window.pageYOffset + rect.top - 20; // un poco de margen
-                    const nearTop = Math.abs(rect.top) < 40; // ya casi arriba
-                    const targetY = nearTop ? 0 : topOffset;
-                    window.scrollTo({ top: targetY, behavior: 'smooth' });
+                // Desplaza siempre hasta la zona de los ejes (navegación principal)
+                if (mainNav) {
+                    const rect = mainNav.getBoundingClientRect();
+                    const targetY = window.pageYOffset + rect.top - 16; // margen superior ligero
+                    window.scrollTo({ top: targetY < 0 ? 0 : targetY, behavior: 'smooth' });
                 } else {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-            }, { passive: true });
+            });
 
             activateSection('eje1', true);
 
