@@ -865,13 +865,24 @@ document.addEventListener('DOMContentLoaded', () => {
             // Sin animaciones adicionales: no se requiere pausar/reanudar
 
             backToTopButton.addEventListener('click', () => {
-                // Desplaza siempre hasta la zona de los ejes (navegación principal)
-                if (mainNav) {
-                    const rect = mainNav.getBoundingClientRect();
-                    const targetY = window.pageYOffset + rect.top - 16; // margen superior ligero
-                    window.scrollTo({ top: targetY < 0 ? 0 : targetY, behavior: 'smooth' });
-                } else {
+                // Nueva lógica: si estamos lejos del nav -> ir al nav; si ya casi arriba -> ir al top absoluto
+                const header = document.getElementById('page-header');
+                const navRect = mainNav ? mainNav.getBoundingClientRect() : null;
+                const navTopAbs = navRect ? window.pageYOffset + navRect.top : 0;
+                const current = window.pageYOffset;
+                // Umbrales
+                const nearNav = Math.abs(current - navTopAbs) < 120; // ya estamos prácticamente en los ejes
+                if (!mainNav) {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+                if (nearNav) {
+                    // Subir del todo para mostrar también el hero
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Ir a los ejes (ligero margen superior)
+                    const targetY = Math.max(0, navTopAbs - 16);
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
                 }
             });
 
