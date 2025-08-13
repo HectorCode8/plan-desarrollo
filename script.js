@@ -925,4 +925,130 @@ document.addEventListener('DOMContentLoaded', () => {
             window.addEventListener('resize', () => {
                 Object.values(eCharts).forEach((inst) => { try { inst.resize(); } catch {} });
             });
+            // --- Parallax Partículas (mejorado con líneas y profundidad) ---
+            (function initParticles(){
+                const wrapper = document.getElementById('particle-wrapper');
+                const canvas = document.getElementById('particles-canvas');
+                if(!canvas || !wrapper) return;
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+                const mediaReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const CONFIG = {
+                    // Aumentamos ligeramente la cantidad para más presencia visual
+                    COUNT: mediaReduce ? 40 : 100,
+                    LINK_DIST: 130,
+                    MAX_LINKS_PER_PARTICLE: 8
+                };
+                let particles = [];
+                function rand(min,max){ return Math.random()*(max-min)+min; }
+                function themeColor(varName, fallback){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()||fallback; }
+                function resize(){
+                    const w = wrapper.clientWidth;
+                    const h = wrapper.clientHeight;
+                    canvas.width = w * dpr;
+                    canvas.height = h * dpr;
+                    ctx.setTransform(1,0,0,1,0,0); // evita acumulación de escalas
+                    ctx.scale(dpr,dpr);
+                }
+                window.addEventListener('resize', () => { resize(); spawn(true); });
+                resize();
+                function spawn(reset=false){
+                    const w = canvas.width / dpr; const h = canvas.height / dpr;
+                    if(!reset || particles.length === 0){
+                        particles = Array.from({length: CONFIG.COUNT}, () => newParticle(w,h));
+                    } else {
+                        // Ajusta posiciones al nuevo tamaño
+                        particles.forEach(p => { p.x = (p.x / p._wPrev) * w; p.y = (p.y / p._hPrev) * h; p._wPrev = w; p._hPrev = h; });
+                    }
+                }
+        function newParticle(w,h){
+                    const depth = Math.random(); // 0 (lejos) a 1 (cerca)
+                    return {
+            x: Math.random()*w,
+            y: Math.random()*h,
+            // Más variación de tamaño (pequeños y algunos un poco mayores)
+            r: rand(0.8, 4.2) * (0.55 + depth*0.9),
+            o: rand(0.25,0.85) * (0.5 + depth*0.6),
+            // +10% velocidad y ligera mayor amplitud
+            vx: rand(-0.066,0.066) * (0.3 + depth) * 1.1,
+            vy: rand(0.0165,0.121) * (0.4 + depth*0.8) * 1.1,
+            drift: rand(-0.0385,0.0385),
+                        depth,
+                        _wPrev: w,
+                        _hPrev: h
+                    };
+                }
+                spawn();
+                let lastY = window.scrollY;
+                let lastFrame = performance.now();
+                function draw(now){
+                    const dtMs = now - lastFrame; lastFrame = now;
+                    const w = canvas.width / dpr; const h = canvas.height / dpr;
+                    ctx.clearRect(0,0,w,h);
+                    const colA = themeColor('--primary-400', '#94a3b8') || '#94a3b8';
+                    const colB = themeColor('--primary-500', '#64748b') || '#64748b';
+                    const colLine = themeColor('--primary-600', '#475569') || '#475569';
+                    // Precalcula gradiente grande
+                    const bgGrad = ctx.createLinearGradient(0,0,w,h);
+                    bgGrad.addColorStop(0, colA + '40');
+                    bgGrad.addColorStop(1, colB + '55');
+                    // Actualiza y dibuja partículas
+                    particles.forEach(p => {
+                        const speedScale = mediaReduce ? 0.3 : 1;
+                        p.x += (p.vx + p.drift * Math.sin(now/6000)) * speedScale;
+                        p.y += p.vy * speedScale;
+                        // Reciclaje
+                        if(p.y - p.r > h){ p.y = -p.r; p.x = Math.random()*w; }
+                        if(p.x < -15) p.x = w + 15; else if(p.x > w + 15) p.x = -15;
+                        // Dibujo círculo con leve halo
+                        ctx.beginPath();
+                        ctx.globalAlpha = p.o;
+                        ctx.fillStyle = bgGrad;
+                        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                        ctx.fill();
+                        // Halo
+                        ctx.globalAlpha = p.o * 0.25;
+                        ctx.beginPath();
+                        ctx.fillStyle = colB + '22';
+                        ctx.arc(p.x, p.y, p.r*2.2, 0, Math.PI*2);
+                        ctx.fill();
+                    });
+                    ctx.globalAlpha = 1;
+                    // Líneas de conexión (limitadas para no saturar)
+                    for(let i=0;i<particles.length;i++){
+                        let links = 0;
+                        const pa = particles[i];
+                        for(let j=i+1;j<particles.length;j++){
+                            if(links >= CONFIG.MAX_LINKS_PER_PARTICLE) break;
+                            const pb = particles[j];
+                            const dx = pa.x - pb.x; const dy = pa.y - pb.y;
+                            const dist2 = dx*dx + dy*dy;
+                            const maxD = CONFIG.LINK_DIST;
+                            if(dist2 < maxD*maxD){
+                                const dist = Math.sqrt(dist2);
+                                const alpha = (1 - dist / maxD) * 0.5 * (pa.o+pb.o)/2; // atenúa con distancia y opacidad
+                                if(alpha > 0.02){
+                                    ctx.strokeStyle = colLine;
+                                    ctx.globalAlpha = alpha * 0.6;
+                                    ctx.lineWidth = 1 + (1 - dist / maxD) * 0.6 * (0.3 + pa.depth*0.7);
+                                    ctx.beginPath();
+                                    ctx.moveTo(pa.x, pa.y);
+                                    ctx.lineTo(pb.x, pb.y);
+                                    ctx.stroke();
+                                    ctx.globalAlpha = 1;
+                                    links++;
+                                }
+                            }
+                        }
+                    }
+                    requestAnimationFrame(draw);
+                }
+                requestAnimationFrame(draw);
+                // Parallax por scroll (suave y sutil)
+                window.addEventListener('scroll', () => {
+                    const delta = window.scrollY - lastY; lastY = window.scrollY;
+                    const factor = -0.03; // más ligero
+                    particles.forEach(p => { p.y += delta * factor * (0.3 + p.depth*0.7); });
+                }, { passive: true });
+            })();
         });
