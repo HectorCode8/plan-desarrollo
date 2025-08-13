@@ -591,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const ec = initEChart(c);
                             const amber = '#f59e0b';
                             const opts = {
-                                title: { text: 'Meta: 100% comunidades visitadas al mes', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Meta: 100% Comunidades Atendidas (Mensual)', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
                                 series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidas', itemStyle: { color: amber } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
@@ -910,8 +910,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 function rand(min,max){ return Math.random()*(max-min)+min; }
                 function themeColor(varName, fallback){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()||fallback; }
                 function resize(){
-                    const w = wrapper.clientWidth;
-                    const h = wrapper.clientHeight;
+                    // Usar dimensiones del viewport para mantener partículas constantes entre cambios de eje
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
                     canvas.width = w * dpr;
                     canvas.height = h * dpr;
                     ctx.setTransform(1,0,0,1,0,0); // evita acumulación de escalas
