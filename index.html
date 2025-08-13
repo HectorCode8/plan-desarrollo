@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="night">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <meta name="description" content="Visión ciudadana independiente para un Teocuitatlán renovado: prosperidad compartida, seguridad confiable y calidad de vida.">
     <link rel="canonical" href="https://plan-desarrollo-teocuitatlan.netlify.app/">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#f97316">
+    <meta name="theme-color" content="#0891d2">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -54,7 +54,10 @@
 
     
 
-    <div class="container mx-auto px-4 py-8 md:py-12">
+    <div class="container mx-auto px-4 py-8 md:py-12 relative">
+    <div id="particle-wrapper" aria-hidden="true">
+        <canvas id="particles-canvas"></canvas>
+    </div>
 
     <header class="text-center mb-12" id="page-header" role="banner">
             <div class="inline-block text-white py-8 px-10 rounded-3xl shadow-2xl animated-header brand-hero">
@@ -155,24 +158,9 @@
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
     </button>
 
-            <button id="theme-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="theme-panel" aria-label="Cambiar tema de color" title="Cambiar tema">
-                <span class="dot" aria-hidden="true"></span>
-                <span class="label">Tema</span>
-                <svg class="chev" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"/></svg>
+            <button id="theme-toggle" aria-label="Cambiar modo día/noche" title="Cambiar modo" data-mode-switch>
+                <span class="icon" aria-hidden="true">🌙</span>
             </button>
-            <div id="theme-panel" class="theme-panel" role="dialog" aria-label="Selector de tema">
-                <div class="swatches">
-                    <button class="swatch neutral" data-theme="neutral" title="Neutral" aria-label="Tema Neutral"></button>
-                    <button class="swatch pri" data-theme="pri" title="Verde PRI" aria-label="Tema Verde PRI"></button>
-                    <button class="swatch pan" data-theme="pan" title="Azul PAN" aria-label="Tema Azul PAN"></button>
-                    <button class="swatch prd" data-theme="prd" title="Amarillo PRD" aria-label="Tema Amarillo PRD"></button>
-                    <button class="swatch morena" data-theme="morena" title="Guinda Morena" aria-label="Tema Guinda Morena"></button>
-                    <button class="swatch pt" data-theme="pt" title="Rojo PT" aria-label="Tema Rojo PT"></button>
-                    <button class="swatch verde" data-theme="verde" title="Verde Partido Verde" aria-label="Tema Verde PVEM"></button>
-                    <button class="swatch mc" data-theme="mc" title="Naranja Movimiento Ciudadano" aria-label="Tema Naranja MC"></button>
-                    <button class="swatch na" data-theme="na" title="Turquesa Nueva Alianza" aria-label="Tema Turquesa Nueva Alianza"></button>
-                </div>
-            </div>
 
     <!-- Animations libraries (UI only) -->
     <script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.js"></script>

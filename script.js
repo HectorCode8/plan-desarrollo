@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const backToTopButton = document.getElementById('back-to-top');
             const mainNav = document.getElementById('main-nav');
             const themeToggle = document.getElementById('theme-toggle');
-            const themePanel = document.getElementById('theme-panel');
+            const themePanel = null; // eliminado en modo día/noche
 
             // Helpers de color/tema y utilidades de charts
             function getThemeColor(varName, fallback) {
@@ -23,91 +23,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Chart.js eliminado; toda la visualización usa ECharts.
 
-            // Gestión de tema: 8 nuevos + neutral
-            const themes = ['neutral', 'pri', 'pan', 'prd', 'morena', 'pt', 'verde', 'mc', 'na'];
+            // Sistema reducido: sólo día (day) y noche (night)
             function applyTheme(theme) {
                 const html = document.documentElement;
                 html.setAttribute('data-theme', theme);
                 localStorage.setItem('theme', theme);
+                // Icono sol/luna
                 if (themeToggle) {
-                    const label = themeToggle.querySelector('.label');
-                    if (label) label.textContent = `Tema`;
+                    const iconSpan = themeToggle.querySelector('.icon');
+                    if (iconSpan) iconSpan.textContent = theme === 'night' ? '☀️' : '🌙';
                 }
-                // Actualiza meta theme-color según el tema activo
-                const primary600 = getThemeColor('--primary-600', '#7c3aed');
+                // Meta theme-color (para navegadores móviles)
+                const primary600 = getThemeColor('--primary-600', '#0284c7');
                 const metaTheme = document.querySelector('meta[name="theme-color"]');
                 if (metaTheme) metaTheme.setAttribute('content', primary600);
-                // Re-render de charts visibles para aplicar la nueva paleta
-                try { refreshVisibleCharts(); } catch { /* noop */ }
+                try { refreshVisibleCharts(); } catch {}
             }
-            const savedTheme = localStorage.getItem('theme');
-            const initial = themes.includes(savedTheme) ? savedTheme : 'neutral';
+            // Preferencia persistida; si no existe, arrancamos siempre en modo noche por diseño
+            const stored = localStorage.getItem('theme');
+            const initial = (stored === 'day' || stored === 'night') ? stored : 'night';
             applyTheme(initial);
             if (themeToggle) {
                 themeToggle.addEventListener('click', () => {
-                    const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
-                    if (!expanded) {
-                        themeToggle.setAttribute('aria-expanded', 'true');
-                        if (themePanel) {
-                            themePanel.classList.add('open');
-                            if (Motion && !prefersReduce) {
-                                Motion.animate(themePanel, { opacity: [0, 1], transform: ['translateY(-8px)', 'translateY(0)'] }, { duration: 0.25, easing: 'ease-out' });
-                            }
-                        }
-                    } else {
-                        // Animar cierre y luego ocultar
-                        if (themePanel && Motion && !prefersReduce) {
-                            const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.2, easing: 'ease-in' });
-                            a.finished.then(() => {
-                                themePanel.classList.remove('open');
-                                themeToggle.setAttribute('aria-expanded', 'false');
-                            });
-                        } else {
-                            if (themePanel) themePanel.classList.remove('open');
-                            themeToggle.setAttribute('aria-expanded', 'false');
-                        }
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'night' ? 'day' : 'night';
+                    applyTheme(next);
+                    if (Motion && !prefersReduce) {
+                        try { Motion.animate(themeToggle, { rotate: [0, 180] }, { duration: 0.5, easing: 'ease-in-out' }); } catch {}
                     }
                 });
-                document.addEventListener('click', (e) => {
-                    if (!themePanel || !themeToggle) return;
-                    const expanded = themeToggle.getAttribute('aria-expanded') === 'true';
-                    if (expanded && !themePanel.contains(e.target) && !themeToggle.contains(e.target)) {
-                        if (Motion && !prefersReduce) {
-                            const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.18, easing: 'ease-in' });
-                            a.finished.then(() => { themePanel.classList.remove('open'); themeToggle.setAttribute('aria-expanded', 'false'); });
-                        } else {
-                            themePanel.classList.remove('open');
-                            themeToggle.setAttribute('aria-expanded', 'false');
-                        }
-                    }
-                });
-                // Cerrar con Escape
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && themePanel && themePanel.classList.contains('open')) {
-                        if (Motion && !prefersReduce) {
-                            const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.18, easing: 'ease-in' });
-                            a.finished.then(() => { themePanel.classList.remove('open'); themeToggle.setAttribute('aria-expanded', 'false'); });
-                        } else {
-                            themePanel.classList.remove('open');
-                            themeToggle.setAttribute('aria-expanded', 'false');
-                        }
-                    }
-                });
-                if (themePanel) {
-                    themePanel.querySelectorAll('.swatch').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const t = btn.getAttribute('data-theme');
-                            applyTheme(t);
-                            if (Motion && !prefersReduce) {
-                                const a = Motion.animate(themePanel, { opacity: [1, 0], transform: ['translateY(0)', 'translateY(-8px)'] }, { duration: 0.15, easing: 'ease-in' });
-                                a.finished.then(() => { themePanel.classList.remove('open'); themeToggle.setAttribute('aria-expanded', 'false'); });
-                            } else {
-                                themePanel.classList.remove('open');
-                                themeToggle.setAttribute('aria-expanded', 'false');
-                            }
-                        });
-                    });
-                }
             }
 
             const proposals = {
@@ -405,6 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const primary = getThemeColor('--primary-500', '#8b5cf6');
                 const primarySoft = getThemeColor('--primary-400', '#a78bfa');
                 const primaryDark = getThemeColor('--primary-700', '#6d28d9');
+                const isNight = document.documentElement.getAttribute('data-theme') === 'night';
+                const titleColor = isNight ? getThemeColor('--text-strong', '#e6edf3') : '#44403c';
+                const axisColor = isNight ? getThemeColor('--text-muted', '#8ea2b5') : '#6b7280';
+                const gridLine = isNight ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
+                const barBase = isNight ? '#94a3b8' : '#9ca3af';
 
                 // Piloto: usar ECharts (renderer SVG) para 'alumbrado'
                 if (type === 'alumbrado' && window.echarts) {
@@ -413,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const prefersReduceAnim = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                     const chart = initEChart(container);
                     const option = {
-                        title: { text: 'Meta: 100% Cobertura LED', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                        title: { text: 'Meta: 100% Cobertura LED', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                         animation: !prefersReduceAnim,
                         animationDuration: 700,
                         animationEasing: 'cubicOut',
@@ -469,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const prefersReduceAnim2 = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                 const ec2 = initEChart(container2);
                             const option2 = {
-                                title: { text: 'Aumento de Visitantes al Mercado', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Aumento de Visitantes al Mercado', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 animation: !prefersReduceAnim2,
                                 animationDuration: 700,
                                 animationDurationUpdate: 500,
@@ -478,10 +427,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 64 : 72), bottom: (window.innerWidth <= 640 ? 56 : 56) },
-                                xAxis: { type: 'category', data: ['Visitantes Semanales'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } } },
+                                xAxis: { type: 'category', data: ['Visitantes Semanales'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [
-                                    { name: 'Antes', type: 'bar', data: [500], itemStyle: { color: '#6b7280', borderRadius: [4,4,0,0] }, animationDelay: (idx) => 120 },
+                                    { name: 'Antes', type: 'bar', data: [500], itemStyle: { color: barBase, borderRadius: [4,4,0,0] }, animationDelay: (idx) => 120 },
                                     { name: 'Después', type: 'bar', data: [1500], itemStyle: { color: primary, borderRadius: [4,4,0,0] }, animationDelay: (idx) => 220 }
                                 ]
                             };
@@ -498,11 +447,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Mejora del Espacio Público', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Mejora del Espacio Público', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: (window.innerWidth <= 640 ? 52 : 40) },
-                                xAxis: { type: 'category', data: ['Antes', 'Después'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } } },
+                                xAxis: { type: 'category', data: ['Antes', 'Después'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', max: 100, axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [40, 95], itemStyle: { color: (p) => p.dataIndex === 0 ? '#9ca3af' : primary, borderRadius: [6,6,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -513,11 +462,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Reducción de Fugas (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Reducción de Fugas (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis' },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: (window.innerWidth <= 640 ? 52 : 40) },
-                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', min: 0, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: axisColor }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', min: 0, axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ name: 'Fugas', type: 'line', smooth: true, data: [40,30,15,5], lineStyle: { width: 2.5, color: '#fb923c' }, areaStyle: { color: 'rgba(251,146,60,0.18)' }, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fb923c' } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -528,11 +477,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Nuevas Empresas Creadas', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Nuevas Empresas Creadas', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: (window.innerWidth <= 640 ? 52 : 40) },
-                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [15,35,50], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -543,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Aumento de Rentabilidad', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Aumento de Rentabilidad', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 animation: !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
                                 animationDuration: 700,
                                 animationDurationUpdate: 500,
@@ -552,8 +501,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 64 : 72), bottom: (window.innerWidth <= 640 ? 56 : 56) },
-                                xAxis: { type: 'category', data: ['Ingreso Mensual'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Ingreso Mensual'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [
                                     { name: 'Antes', type: 'bar', data: [100], itemStyle: { color: '#6b7280', borderRadius: [4,4,0,0] }, animationDelay: (idx) => 120 },
                                     { name: 'Después', type: 'bar', data: [150], itemStyle: { color: primary, borderRadius: [4,4,0,0] }, animationDelay: (idx) => 220 }
@@ -567,11 +516,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Crecimiento Exponencial de Visitantes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Crecimiento Exponencial de Visitantes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis' },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: (window.innerWidth <= 640 ? 52 : 40) },
-                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: axisColor }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ name: 'Visitantes', type: 'line', smooth: true, data: [1000,2500,4500,7000], lineStyle: { width: 2.5, color: primary }, areaStyle: { color: `${primarySoft}55` }, symbol: 'circle', symbolSize: 8, itemStyle: { color: primary } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -582,11 +531,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Reducción Tiempo de Respuesta', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Reducción Tiempo de Respuesta', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: (window.innerWidth <= 640 ? 52 : 40) },
-                                xAxis: { type: 'category', data: ['Actual','Propuesta'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' } },
+                                xAxis: { type: 'category', data: ['Actual','Propuesta'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor } },
                                 series: [{ type: 'bar', data: [15,5], itemStyle: { color: (p)=> p.dataIndex===0? '#6b7280' : primary, borderRadius: [6,6,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -656,11 +605,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Reducción Drástica de Tiempos', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Reducción Drástica de Tiempos', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: 56, bottom: (window.innerWidth <= 640 ? 52 : 40) },
-                                xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [4,0.25], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -671,11 +620,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Respuesta Rápida a Reportes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Respuesta Rápida a Reportes', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 64 : 72), bottom: (window.innerWidth <= 640 ? 56 : 44) },
-                                xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Antes','Ahora'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [15,3], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -686,11 +635,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Consultas Médicas Gratuitas', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Consultas Médicas Gratuitas', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: 40 },
-                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [2000,5000,8000], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -701,11 +650,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Reducción de Casos de Dengue', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Reducción de Casos de Dengue', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis' },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: 40 },
-                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', min: 0, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: axisColor }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', min: 0, axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ name: 'Casos de Dengue', type: 'line', smooth: true, data: [100,60,20,5], lineStyle: { width: 2.5, color: '#ef4444' }, areaStyle: { color: 'rgba(239,68,68,0.18)' }, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#ef4444' } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -730,11 +679,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Reducción en Recibo de Luz (-40%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Reducción en Recibo de Luz (-40%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: 40 },
-                                xAxis: { type: 'category', data: ['Costo Actual','Apoyo Solar'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Costo Actual','Apoyo Solar'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [100,60], itemStyle: { color: (p)=> p.dataIndex===0? '#9ca3af' : primary, borderRadius: [8,8,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -745,11 +694,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Reducción de Dependencia Hídrica (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Reducción de Dependencia Hídrica (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis' },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: 40 },
-                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: '#6b7280' }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', min: 0, max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Año 0','1','2','3'], boundaryGap: false, axisLabel: { color: axisColor }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', min: 0, max: 100, axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ name: 'Dependencia Externa', type: 'line', smooth: true, data: [100,85,70,55], lineStyle: { width: 2.5, color: primary }, areaStyle: { color: `${primarySoft}55` }, symbol: 'circle', symbolSize: 8, itemStyle: { color: primary } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -775,11 +724,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Nuevos Árboles para Teocuitatlán', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Nuevos Árboles para Teocuitatlán', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 60 : 68), bottom: 40 },
-                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [2500,6000,10000], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -804,11 +753,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '320px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Atletas con Beca Deportiva', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Atletas con Beca Deportiva', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                                 grid: { left: 40, right: 16, top: 56, bottom: 40 },
-                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                                yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                                xAxis: { type: 'category', data: ['Año 1','Año 2','Año 3'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                                yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                                 series: [{ type: 'bar', data: [20,50,100], itemStyle: { color: '#f59e0b', borderRadius: [8,8,0,0] } }]
                             };
                             ec.setOption(opts); eCharts[chartId] = ec; return;
@@ -981,6 +930,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 spawn();
                 let lastY = window.scrollY;
                 let lastFrame = performance.now();
+                let frameCount = 0;
                 function draw(now){
                     const dtMs = now - lastFrame; lastFrame = now;
                     const w = canvas.width / dpr; const h = canvas.height / dpr;
@@ -988,18 +938,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     const colA = themeColor('--primary-400', '#94a3b8') || '#94a3b8';
                     const colB = themeColor('--primary-500', '#64748b') || '#64748b';
                     const colLine = themeColor('--primary-600', '#475569') || '#475569';
-                    // Precalcula gradiente grande
+                    // Precalcula gradiente grande para relleno de partículas
                     const bgGrad = ctx.createLinearGradient(0,0,w,h);
                     bgGrad.addColorStop(0, colA + '40');
                     bgGrad.addColorStop(1, colB + '55');
-                    // Actualiza y dibuja partículas
+                    // Movimiento flotante: ruido senoidal + deriva leve, sin gravedad
+                    const MAX_SPEED = 0.22; // menor para sensación flotante
                     particles.forEach(p => {
-                        const speedScale = mediaReduce ? 0.3 : 1;
+                        // Pequeña variación direccional lenta (cambia suavemente dirección)
+                        const wander = 0.0009 + p.depth*0.0007;
+                        p.vx += Math.sin((now/4000) + p.x*0.002 + p.depth*5) * wander;
+                        p.vy += Math.cos((now/5000) + p.y*0.002 + p.depth*7) * wander;
+                        // Límite de velocidad
+                        const speed = Math.hypot(p.vx, p.vy) || 1;
+                        const maxLocal = MAX_SPEED * (0.5 + p.depth*0.9);
+                        if(speed > maxLocal){ const s = maxLocal / speed; p.vx *= s; p.vy *= s; }
+                        const speedScale = mediaReduce ? 0.35 : 0.9;
                         p.x += (p.vx + p.drift * Math.sin(now/6000)) * speedScale;
-                        p.y += p.vy * speedScale;
-                        // Reciclaje
-                        if(p.y - p.r > h){ p.y = -p.r; p.x = Math.random()*w; }
-                        if(p.x < -15) p.x = w + 15; else if(p.x > w + 15) p.x = -15;
+                        p.y += (p.vy + Math.sin(now/9000 + p.drift)*0.02) * speedScale;
+                        // Envolvente (wrap) para efecto espacio infinito
+                        if(p.x < -20) p.x = w + 20; else if(p.x > w + 20) p.x = -20;
+                        if(p.y < -20) p.y = h + 20; else if(p.y > h + 20) p.y = -20;
                         // Dibujo círculo con leve halo
                         ctx.beginPath();
                         ctx.globalAlpha = p.o;
@@ -1014,33 +973,101 @@ document.addEventListener('DOMContentLoaded', () => {
                         ctx.fill();
                     });
                     ctx.globalAlpha = 1;
-                    // Líneas de conexión (limitadas para no saturar)
-                    for(let i=0;i<particles.length;i++){
-                        let links = 0;
-                        const pa = particles[i];
-                        for(let j=i+1;j<particles.length;j++){
-                            if(links >= CONFIG.MAX_LINKS_PER_PARTICLE) break;
-                            const pb = particles[j];
-                            const dx = pa.x - pb.x; const dy = pa.y - pb.y;
-                            const dist2 = dx*dx + dy*dy;
-                            const maxD = CONFIG.LINK_DIST;
-                            if(dist2 < maxD*maxD){
-                                const dist = Math.sqrt(dist2);
-                                const alpha = (1 - dist / maxD) * 0.5 * (pa.o+pb.o)/2; // atenúa con distancia y opacidad
-                                if(alpha > 0.02){
-                                    ctx.strokeStyle = colLine;
-                                    ctx.globalAlpha = alpha * 0.6;
-                                    ctx.lineWidth = 1 + (1 - dist / maxD) * 0.6 * (0.3 + pa.depth*0.7);
-                                    ctx.beginPath();
-                                    ctx.moveTo(pa.x, pa.y);
-                                    ctx.lineTo(pb.x, pb.y);
-                                    ctx.stroke();
-                                    ctx.globalAlpha = 1;
-                                    links++;
+                    // Líneas de conexión con variabilidad (no siempre unidas)
+                    // Animación de líneas: mantenemos enlaces vivos con curva y pulso viajero
+                    // Estructura de enlace: {key,a,b,t0,dur,seed,baseAlpha,width,proximity}
+                    if(!window.__particleLinks){ window.__particleLinks = new Map(); }
+                    const linksMap = window.__particleLinks;
+                    // Intentamos crear nuevos enlaces sólo 1 de cada 3 frames
+                    if(frameCount % 3 === 0){
+                        for(let i=0;i<particles.length;i++){
+                            let createdForA = 0;
+                            const pa = particles[i];
+                            for(let j=i+1;j<particles.length;j++){
+                                if(createdForA >= CONFIG.MAX_LINKS_PER_PARTICLE) break;
+                                const pb = particles[j];
+                                const dx = pa.x - pb.x; const dy = pa.y - pb.y;
+                                const dist2 = dx*dx + dy*dy;
+                                const maxD = CONFIG.LINK_DIST;
+                                if(dist2 < maxD*maxD){
+                                    const dist = Math.sqrt(dist2);
+                                    const proximity = 1 - dist / maxD;
+                                    const depthMix = (pa.depth + pb.depth)/2;
+                                    const prob = (0.25 + depthMix*0.5) * proximity;
+                                    if(Math.random() < prob){
+                                        const key = i+"-"+j;
+                                        if(!linksMap.has(key) && linksMap.size < 260){
+                                            const baseAlpha = proximity * 0.55 * (pa.o+pb.o)/2;
+                                            if(baseAlpha > 0.04){
+                                                linksMap.set(key, {
+                                                    key, a: pa, b: pb,
+                                                    t0: now,
+                                                    dur: 1400 + Math.random()*2300, // 1.4s - 3.7s
+                                                    seed: Math.random(),
+                                                    baseAlpha,
+                                                    width: 0.6 + proximity * 0.9 * (0.3 + pa.depth*0.7),
+                                                    proximity
+                                                });
+                                                createdForA++;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+                    // Dibujo de enlaces existentes con animaciones
+                    if(linksMap.size){
+                        const toDelete = [];
+                        linksMap.forEach(link => {
+                            const age = now - link.t0;
+                            if(age > link.dur){ toDelete.push(link.key); return; }
+                            const t = age / link.dur; // 0..1
+                            // Easing para alpha (acelera y desacelera) y fade in/out
+                            const ease = t < 0.5 ? (2*t*t) : (1 - Math.pow(-2*t+2,2)/2); // easeInOutQuad
+                            // Fade: entra 15%, sale 25%
+                            let fade = 1;
+                            if(t < 0.15) fade = t/0.15; else if(t > 0.75) fade = (1 - t) / 0.25; // lineal
+                            const alpha = link.baseAlpha * ease * fade;
+                            if(alpha < 0.02) return;
+                            const { a, b } = link;
+                            const dx = b.x - a.x; const dy = b.y - a.y;
+                            // Curvatura ligera según seno y seed
+                            const perpLen = Math.hypot(dx,dy) || 1;
+                            const nx = -dy / perpLen; const ny = dx / perpLen;
+                            const wobble = Math.sin((t + link.seed) * Math.PI * 2) * (4 + 8*(1 - link.proximity)) * (0.3 + (1 - a.depth));
+                            const cx = a.x + dx * 0.5 + nx * wobble; // punto de control
+                            const cy = a.y + dy * 0.5 + ny * wobble;
+                            // Gradiente dinámico con brillo central
+                            const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+                            grad.addColorStop(0, colLine + '00');
+                            grad.addColorStop(0.5, colLine + 'ff');
+                            grad.addColorStop(1, colLine + '00');
+                            ctx.lineWidth = link.width * (0.9 + 0.4*Math.sin((t+link.seed)*Math.PI*2));
+                            ctx.strokeStyle = grad;
+                            ctx.globalAlpha = alpha;
+                            ctx.beginPath();
+                            ctx.moveTo(a.x, a.y);
+                            ctx.quadraticCurveTo(cx, cy, b.x, b.y);
+                            ctx.stroke();
+                            // Pulso viajero luminoso
+                            const pulseT = ((t * 1.6 + link.seed) % 1);
+                            const px = a.x + dx * pulseT;
+                            const py = a.y + dy * pulseT;
+                            const pulseR = 1.2 + 2.2 * (1 - Math.abs(0.5 - pulseT)*2); // pico al centro
+                            ctx.globalAlpha = alpha * 0.85;
+                            const pulseGrad = ctx.createRadialGradient(px, py, 0, px, py, pulseR*3);
+                            pulseGrad.addColorStop(0, colLine + 'ff');
+                            pulseGrad.addColorStop(1, colLine + '00');
+                            ctx.fillStyle = pulseGrad;
+                            ctx.beginPath();
+                            ctx.arc(px, py, pulseR, 0, Math.PI*2);
+                            ctx.fill();
+                            ctx.globalAlpha = 1;
+                        });
+                        toDelete.forEach(k => linksMap.delete(k));
+                    }
+                    frameCount++;
                     requestAnimationFrame(draw);
                 }
                 requestAnimationFrame(draw);
