@@ -665,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '300px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Meta: Atención al 100% de inscritos', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Adultos Mayores: 100% Atención Integral', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
                                 series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Atendidos', itemStyle: { color: primary } }, { value: 0, name: 'Pendiente', itemStyle: { color: '#e5e7eb' } }] }]
