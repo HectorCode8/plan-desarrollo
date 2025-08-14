@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 animationEasing: 'cubicOut',
                                 animationEasingUpdate: 'cubicOut',
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
+                                legend: { show: true, bottom: 0, textStyle: { color: axisColor, fontFamily: 'Lato' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 64 : 72), bottom: (window.innerWidth <= 640 ? 56 : 56) },
                                 xAxis: { type: 'category', data: ['Visitantes Semanales'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
                                 yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
@@ -499,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 animationEasing: 'cubicOut',
                                 animationEasingUpdate: 'cubicOut',
                                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                                legend: { show: true, bottom: 0, textStyle: { color: '#44403c', fontFamily: 'Lato' } },
+                                legend: { show: true, bottom: 0, textStyle: { color: axisColor, fontFamily: 'Lato' } },
                                 grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 64 : 72), bottom: (window.innerWidth <= 640 ? 56 : 56) },
                                 xAxis: { type: 'category', data: ['Ingreso Mensual'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
                                 yAxis: { type: 'value', axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
@@ -578,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const ec = initEChart(c);
                             const amber = '#f59e0b';
                             const opts = {
-                                title: { text: '20% del Presupuesto en tus Manos', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Presupuesto Participativo: 20% Ciudadano', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { show: true, formatter: '{b}: {c}%' }, legend: { show: false },
                                 series: [{ type: 'pie', radius: ['40%','70%'], center: ['50%','50%'], label: { formatter: '{b}: {d}%' }, data: [{ value: 20, name: 'Decidido por Ciudadanos', itemStyle: { color: amber } }, { value: 80, name: 'Presupuesto Regular', itemStyle: { color: '#e5e7eb' } }] }]
                             };
@@ -710,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const ec = initEChart(c);
                             const amber = '#f59e0b';
                             const opts = {
-                                title: { text: 'Meta: 60% de Basura Revalorizada', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Basura Cero: 60% Revalorizada', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '60%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
                                 series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 60, name: 'Revalorizado', itemStyle: { color: amber } }, { value: 40, name: 'Relleno', itemStyle: { color: '#e5e7eb' } }] }]
@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '300px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Meta: 100% Canchas Rehabilitadas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Deporte: 100% Canchas Rehabilitadas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { show: false }, legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
                                 series: [{ type: 'pie', radius: ['50%','70%'], center: ['50%', (window.innerWidth <= 640 ? '48%' : '50%')], avoidLabelOverlap: false, label: { show: false }, labelLine: { show: false }, data: [{ value: 100, name: 'Rehabilitadas', itemStyle: { color: primary } }, { value: 0, name: 'Pendientes', itemStyle: { color: '#e5e7eb' } }] }]
@@ -769,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const ec = initEChart(c);
                         const value = 75;
                         const opts = {
-                            title: { text: 'Avance General', left: 'center', top: 6, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                            title: { text: 'Avance General', left: 'center', top: 6, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                             tooltip: { show: false },
                             series: [{
                                 type: 'gauge', startAngle: 180, endAngle: 0, center: ['50%','65%'], radius: '90%',
@@ -786,11 +786,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         const c = ensureEContainer(canvas, '320px');
                         const ec = initEChart(c);
                         const opts = {
-                            title: { text: 'Balance de Objetivos', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
-                            legend: { bottom: 0, textStyle: { color: '#44403c' } },
+                            title: { text: 'Balance de Objetivos', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
+                            legend: { bottom: 0, textStyle: { color: axisColor } },
                             radar: { indicator: [
                                 { name: 'Movilidad', max: 100 }, { name: 'Agua', max: 100 }, { name: 'Seguridad', max: 100 }, { name: 'Economía', max: 100 }, { name: 'Salud', max: 100 }
-                            ], axisName: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#e5e7eb' } }, splitArea: { areaStyle: { color: ['#fff'] } } },
+                            ], axisName: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } }, splitArea: { areaStyle: { color: ['transparent'] } } },
                             series: [
                                 { type: 'radar', name: 'Actual', data: [[45,50,55,50,52]], areaStyle: { color: 'rgba(148,163,184,0.2)' }, lineStyle: { color: '#94a3b8' }, itemStyle: { color: '#94a3b8' } },
                                 { type: 'radar', name: 'Objetivo', data: [[85,80,90,88,86]], areaStyle: { color: `${primarySoft}55` }, lineStyle: { color: primary }, itemStyle: { color: primary } }
@@ -802,12 +802,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         const c = ensureEContainer(canvas, '320px');
                         const ec = initEChart(c);
                         const opts = {
-                            title: { text: 'Estructura del Empleo (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                            title: { text: 'Estructura del Empleo (%)', left: 'center', top: 8, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                             tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                            legend: { bottom: 0 },
+                            legend: { bottom: 0, textStyle: { color: axisColor } },
                             grid: { left: 40, right: 16, top: (window.innerWidth <= 640 ? 64 : 72), bottom: (window.innerWidth <= 640 ? 56 : 56) },
-                            xAxis: { type: 'category', data: ['Antes','Después'], axisLabel: { color: '#6b7280' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
-                            yAxis: { type: 'value', max: 100, axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+                            xAxis: { type: 'category', data: ['Antes','Después'], axisLabel: { color: axisColor }, axisTick: { show: false }, axisLine: { lineStyle: { color: gridLine } } },
+                            yAxis: { type: 'value', max: 100, axisLabel: { color: axisColor }, splitLine: { lineStyle: { color: gridLine } } },
                             series: [
                                 { name: 'Formal', type: 'bar', stack: 'total', data: [40,65], itemStyle: { color: primary, borderRadius: [8,8,0,0] } },
                                 { name: 'Informal', type: 'bar', stack: 'total', data: [60,35], itemStyle: { color: '#cbd5e1', borderRadius: [8,8,0,0] } }
