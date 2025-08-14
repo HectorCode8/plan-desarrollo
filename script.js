@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const ec = initEChart(c);
                             const amber = '#f59e0b';
                             const opts = {
-                                title: { text: 'Meta: 95% de Quejas Resueltas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Justicia Cívica Itinerante: 95% Quejas Resueltas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { show: false },
                                 legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '95%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: amber } }] },
