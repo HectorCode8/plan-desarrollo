@@ -546,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const c = ensureEContainer(canvas, '300px');
                             const ec = initEChart(c);
                             const opts = {
-                                title: { text: 'Meta: 100% Colonias Conectadas', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: '#44403c' } },
+                                title: { text: 'Red de Alerta Municipal: 100% Cobertura', left: 'center', top: 10, textStyle: { fontFamily: 'Poppins', fontSize: 14, fontWeight: 'bold', color: titleColor } },
                                 tooltip: { show: false },
                                 legend: { show: false },
                                 graphic: { elements: [{ type: 'text', left: 'center', top: 'middle', style: { text: '100%', fontFamily: 'Poppins', fontWeight: 'bold', fontSize: 22, fill: primary } }] },
