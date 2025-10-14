@@ -54,43 +54,47 @@ doc.lineWidth(1.5).strokeColor('#0891d2')
   .stroke();
 doc.moveDown(1.2);
 
-addSection('Proposito', [
-  'Construir un Teocuitatlan renovado que combine prosperidad compartida, seguridad confiable y calidad de vida para cada familia.',
-  'La iniciativa convoca a habitantes, empresas y aliados a sumar su voz mediante participacion transparente, colaboracion comunitaria y rendicion de cuentas continua.'
+addSection('Resumen ejecutivo', [
+  'Teocuitatlan 2027-2030 es un pacto ciudadano que integra infraestructura, bienestar social y crecimiento economico responsable para elevar la calidad de vida en cada comunidad.',
+  'La propuesta articula proyectos listos para ejecutar con financiamiento responsable, gestion transparente y participacion vecinal permanente.'
 ]);
 
-addListSection('Ejes estrategicos clave', [
-  'Infraestructura de vanguardia: movilidad inteligente, plazas renovadas y alumbrado LED para todas las comunidades.',
-  'Economia local viva: incubadora itinerante, apoyos productivos y ruta turistica comunitaria.',
-  'Seguridad con inteligencia: policia de proximidad, red vecinal activa y escudo urbano C5i.',
+addSection('Proposito y ambicion', [
+  'Consolidar un municipio referente de prosperidad compartida, seguridad confiable y servicios dignos para todas las edades.',
+  'Activar alianzas con iniciativa privada, sector social y academia para detonar inversion productiva y talento local sin perder identidad ni arraigo.'
+]);
+
+addListSection('Pilares estrategicos', [
+  'Infraestructura de vanguardia: movilidad conectada, plazas vivas y alumbrado inteligente.',
+  'Economia inclusiva: incubadora itinerante, agroindustria competitiva y turismo comunitario.',
+  'Seguridad con inteligencia: policia guardian, red vecinal y tecnologia C5i.',
   'Gobierno cercano: despacho itinerante, tramites digitales y reporte ciudadano 072.',
-  'Salud y bienestar: brigadas medicas, combate al dengue y casa de dia para adultos mayores.',
-  'Energia y sostenibilidad: parque solar municipal, cosecha de agua y programa Basura Cero.',
-  'Deporte y juventud: unidad deportiva renovada, ciclovias seguras y semillero de campeones.'
+  'Salud y bienestar integral: brigadas permanentes, programa anti-dengue y casa de dia.',
+  'Energia limpia y sostenibilidad: parque solar municipal, cosecha de lluvia y Basura Cero.',
+  'Deporte y juventud: infraestructura renovada, ciclorutas seguras y semillero de campeones.'
 ]);
 
-addListSection('Resultados medibles 2027-2030', [
-  '4 eco-autobuses inteligentes conectando cabecera y comunidades con monitoreo en tiempo real.',
-  '100 por ciento de cobertura de alumbrado LED y espacios publicos rehabilitados en todas las delegaciones.',
-  'Respuesta policial menor a cinco minutos en zonas prioritarias y justicia civica itinerante.',
-  'Presupuesto transparente en linea, obras con seguimiento ciudadano y reportes resueltos en menos de 72 horas.'
+addListSection('Indicadores clave 2027-2030', [
+  'Movilidad: micro-red con 4 eco-autobuses inteligentes, rutas conectadas y tiempos de espera menores a 12 minutos.',
+  'Espacio publico: 100 por ciento de plazas, canchas y parques rehabilitados con iluminacion LED.',
+  'Seguridad: respuesta a emergencias bajo 5 minutos en cabecera y delegaciones prioritarias.',
+  'Transparencia: tablero en linea con seguimiento presupuestal en tiempo real para cada obra y servicio.'
 ]);
 
-addListSection('Hoja de ruta 2025-2027', [
-  'Q4 2025: Socializacion del plan, mesas de trabajo y priorizacion de proyectos con la comunidad.',
-  'Q1 2026: Arranque del sistema de movilidad y despliegue del programa de alumbrado LED.',
-  'Q2-Q4 2026: Implementacion de incubadora itinerante, brigadas de salud y modernizacion de espacios publicos.',
-  '2027: Evaluacion semestral, ampliacion de proyectos de sostenibilidad y cierre con informe ciudadano anual.'
+
+addSection('Implementacion inmediata', [
+  'Cada eje cuenta con proyectos ejecutivos listos para licitar, matrices de riesgo y esquemas de financiamiento mixto.',
+  'La prioridad es arrancar movilidad inteligente, alumbrado LED y el tablero de transparencia durante los primeros seis meses de gestion.'
 ]);
 
-addSection('Gobernanza y participacion', [
-  'El plan se rige por principios de transparencia proactiva y escucha permanente. Se propone un comite ciudadano de seguimiento con representantes de la cabecera y cada comunidad, que auditara avances y presupuestos.',
-  'La administracion municipal compartira indicadores trimestrales y abrira canales digitales para recopilar sugerencias, reportes y testimonios de impacto.'
+addSection('Gobernanza y transparencia', [
+  'Se propone un tablero de control publico con indicadores trimestrales, auditable por un comite ciudadano mixto (cabecera y comunidades).',
+  'Cada proyecto clave incorpora matriz de riesgos, responsables y cronograma, garantizando trazabilidad completa de presupuesto y contrataciones.'
 ]);
 
-addSection('Llamado a la accion', [
-  'Aporta ideas, distribuye este resumen y participa en las sesiones publicas para convertir la vision en proyectos ejecutables.',
-  'Ing. Hector Haro Hermosillo lidera esta agenda ciudadana con puertas abiertas y un compromiso firme de rendicion de cuentas.'
+addSection('Proxima accion', [
+  'Comparte este resumen, sumate a los talleres de planeacion y registra iniciativas locales que puedan integrarse en la agenda 2027-2030.',
+  'El liderazgo del Ing. Hector Haro Hermosillo asegura puertas abiertas, rendicion de cuentas y seguimiento permanente a los compromisos adquiridos.'
 ]);
 
 doc.moveDown(0.4);
@@ -104,7 +108,7 @@ doc.fillColor('#4b5563').font(bodyFont).fontSize(10)
   .text('Ultima actualizacion: 14 de octubre de 2025.', { align: 'right' });
 doc.moveDown(0.2);
 doc.fillColor(headingColor).font('Helvetica-Bold').fontSize(11)
-  .text('Contacto coordinacion: enlace@teocuitatlan2030.mx', { align: 'right' });
+  .text('Contacto coordinacion: hector8.haro@gmail.com', { align: 'right' });
 
 doc.end();
 
