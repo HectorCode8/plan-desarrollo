@@ -134,7 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             function createCard(proposal, isFeatured = false) {
                 const chartHtml = proposal.chart ? `<div class="chart-container mt-4"><canvas id="canvas-${proposal.id}" data-chart-config="${proposal.chart}"></canvas></div>` : '';
-                const counterHtml = proposal.counter ? `<div class="text-center my-4"><div class="text-7xl font-extrabold brand-counter" data-target="${proposal.counter}">0</div><p class="font-bold text-xl mt-2 font-title">Autobuses Nuevos</p></div>` : '';
+                const counterHtml = proposal.counter ? (() => {
+                    const label = proposal.counterLabel || 'Beneficiarios';
+                    return `<div class="text-center my-4"><div class="text-7xl font-extrabold brand-counter" data-target="${proposal.counter}">0</div><p class="font-bold text-xl mt-2 font-title">${label}</p></div>`;
+                })() : '';
                 const visualHtml = proposal.visual ? `<div class="mt-4 text-center"><p class="font-bold text-stone-700">${proposal.visual.label}</p><div class="progress-bar-container"><div class="progress-bar" data-value="${proposal.visual.value}"></div></div></div>` : '';
 
                 const cardFooter = (proposalId) => `
