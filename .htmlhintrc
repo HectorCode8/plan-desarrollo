@@ -1,0 +1,11 @@
+{
+  "attr-lowercase": false,
+  "tagname-lowercase": false,
+  "attr-value-double-quotes": true,
+  "doctype-first": true,
+  "doctype-html5": true,
+  "spec-char-escape": false,
+  "id-class-value": false,
+  "style-disabled": false,
+  "space-tab-mixed-disabled": false
+}

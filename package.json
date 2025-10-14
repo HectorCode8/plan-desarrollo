@@ -1,0 +1,24 @@
+{
+  "name": "plan-desarrollo",
+  "version": "1.0.0",
+  "description": "Sitio ciudadano Teocuitatlán 2027-2030",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && node build.mjs",
+    "lint:html": "npx htmlhint index.html",
+    "lint": "npm run lint:html"
+  },
+  "keywords": [
+    "teocuitatlan",
+    "plan",
+    "ciudadano"
+  ],
+  "author": "Ing. Héctor Haro Hermosillo",
+  "license": "MIT",
+  "devDependencies": {
+    "clean-css": "^5.3.3",
+    "esbuild": "^0.24.0",
+    "html-minifier-terser": "^7.2.0",
+    "rimraf": "^5.0.0"
+  }
+}

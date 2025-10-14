@@ -46,6 +46,7 @@
     <!-- Visualization & Content Choices: Dado que el reporte es cualitativo, se han creado visualizaciones ILUSTRATIVAS para cuantificar las metas. Por ejemplo: Reporte Info (Cobertura 100% de alumbrado) -> Goal (Informar Proporción) -> Viz (Gráfico de Dona) -> Interaction (Animación al cargar) -> Justification (Visualiza el objetivo de forma clara y atractiva) -> Library (Chart.js). Reporte Info (Más policías) -> Goal (Comparar) -> Viz (Gráfico de Barras) -> Interaction (Hover para ver detalles) -> Justification (Muestra el cambio propuesto de forma impactante) -> Library (Chart.js). Se usan íconos Unicode/Emoji para un look profesional y robusto. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
+    <link rel="preload" href="style.css" as="style">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="text-stone-800">
@@ -174,7 +175,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@motionone/dom/dist/motion.umd.js"></script>
     <!-- ECharts (usaremos renderer SVG para integrarlo con Motion One si se desea) -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
       AOS.init({
