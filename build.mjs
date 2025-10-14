@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, copyFile, cp } from 'node:fs/promises';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { minify as minifyHtml } from 'html-minifier-terser';
@@ -113,6 +113,17 @@ async function build() {
 
   console.log('Copiando archivos estáticos...');
   await copyStaticFiles();
+
+  try {
+    console.log('Copiando carpeta de assets...');
+    await cp(resolve(rootDir, 'assets'), resolve(distDir, 'assets'), { recursive: true });
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.warn('Aviso: carpeta assets no encontrada.');
+    } else {
+      throw err;
+    }
+  }
 
   console.log('Build finalizado. Archivos en dist/.');
 }
