@@ -4,7 +4,8 @@
   "description": "Sitio ciudadano Teocuitatlán 2027-2030",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && node build.mjs",
+    "build": "npm run clean && npm run build:resumen && node build.mjs",
+    "build:resumen": "node tools/generate-resumen.mjs",
     "lint:html": "npx htmlhint index.html",
     "lint": "npm run lint:html"
   },
@@ -20,6 +21,7 @@
     "esbuild": "^0.24.0",
     "html-minifier-terser": "^7.2.0",
     "htmlhint": "^1.7.1",
+    "pdfkit": "^0.15.0",
     "rimraf": "^5.0.0"
   }
 }
